@@ -49,12 +49,8 @@ bipboup.on('message', message => {
 // TODO Move this in a command file (but we need access to the `commands` array)
 const help = (message, words) => {
     // TODO check words to see if we need only part of the help text
-    // Build the help text
-    let helpText = '';
-    for (let command of commands) {
-        helpText += `\n!${command.command} : ${command.help}`;
-    }
-    message.reply(helpText);
+    // Reply with the help text
+    message.reply([''].concat(commands.map(command => `!${command.command} : ${command.help}`)).join('\n'));
 };
 
 const startup = () => {
