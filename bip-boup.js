@@ -6,6 +6,7 @@ const bipboup = new Discord.Client();
 
 // Define how people will get the bot's attention
 const attentionChar = '!';
+// TODO Change this to enable commands after a mention
 const attentionRegexp = new RegExp(`^${attentionChar}(.*)`);
 
 let commands = [];
@@ -65,6 +66,7 @@ const startup = () => {
                 if (Path.extname(file) == '.js') {
                     const {command, help, callback} = require(Path.join(__dirname, 'commands', file));
                     if (command == null || help == null || callback == null) return;
+                    // TODO Make sure there's no duplicates
                     commands.push({
                         command: command,
                         help: help,
