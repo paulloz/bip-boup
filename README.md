@@ -1,2 +1,2 @@
 # bip-boup
-A Discord bot doint ???
+A Discord bot doing ???
