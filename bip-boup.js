@@ -77,7 +77,7 @@ const startup = () => {
     // Connect from the token found in the .token file
     Fs.readFile('.token', { encoding : 'utf-8' }, (err, data) => {
         if (err == null)
-            bipboup.login(data);
+            bipboup.login(data.trimRight());
         else
             console.error(err.message);
     });
