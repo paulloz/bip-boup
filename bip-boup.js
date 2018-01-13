@@ -1,4 +1,5 @@
 const Fs = require('fs');
+const Path = require('path');
 const Discord = require('discord.js');
 
 const bipboup = new Discord.Client();
@@ -7,7 +8,7 @@ const bipboup = new Discord.Client();
 const attentionChar = '!';
 const attentionRegexp = new RegExp(`^${attentionChar}(.*)`);
 
-console.log('Starting up...');
+let commands = [];
 
 bipboup.on('ready', () => {
     console.log('I\'m connected to the Discord guild!');
@@ -28,17 +29,47 @@ bipboup.on('message', message => {
         messageContent = messageContent[1].split(/\s+/).filter(word => word.length > 0);
         if (messageContent.length <= 0) return; // Safety
 
-        // TODO Define commands properly in other files
-        if (messageContent[0] == 'github') {
-            message.reply(`<https://github.com/paulloz/bip-boup.git>`);
+        if (messageContent[0] == 'help') {
+        } else {
+            for (let command of commands) {
+                if (messageContent[0] == command.command) {
+                    command.callback(message, messageContent);
+                    break;
+                }
+            }
         }
     }
 });
 
-// Connect from the token found in the .token file
-Fs.readFile('.token', { encoding : 'utf-8' }, (err, data) => {
-    if (err == null)
-        bipboup.login(data.trimRight('\n'));
-    else
-        console.error(err.message);
-});
+const help = (message, words) => {
+};
+
+const startup = () => {
+    console.log('Starting up...');
+
+    Fs.readdir(Path.join(__dirname, 'commands'), (err, files) => {
+        if (err == null) {
+            files.forEach(file => {
+                if (Path.extname(file) == '.js') {
+                    const {command, help, callback} = require(Path.join(__dirname, 'commands', file));
+                    if (command == null || help == null || callback == null) return;
+                    commands.push({
+                        command: command,
+                        help: help,
+                        callback: callback
+                    });
+                }
+            });
+        }
+    });
+
+    // Connect from the token found in the .token file
+    Fs.readFile('.token', { encoding : 'utf-8' }, (err, data) => {
+        if (err == null)
+            bipboup.login(data.trimRight('\n'));
+        else
+            console.error(err.message);
+    });
+};
+
+startup();
