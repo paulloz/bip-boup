@@ -50,6 +50,7 @@ bipboup.on('message', message => {
 const help = (message, words) => {
     // TODO check words to see if we need only part of the help text
     // Reply with the help text
+    // TODO Order alphabeticaly
     message.reply([''].concat(commands.map(command => `!${command.command} : ${command.help}`)).join('\n'));
 };
 
