@@ -23,7 +23,7 @@ bipboup.on('message', message => {
     console.log(`${message.author.username} : ${messageContent}`);
     if (messageContent.startsWith(attentionChar)) {
         // Clean message content
-        messageContent.trim(attentionChar).trim();
+        messageContent = messageContent.trim(attentionChar).trim();
 
         // TODO Define commands properly in other files
         if (messageContent.startsWith('github')) {
