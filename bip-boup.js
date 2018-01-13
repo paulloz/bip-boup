@@ -19,15 +19,15 @@ bipboup.on('ready', () => {
 
 // Respond to messages
 bipboup.on('message', message => {
-    let messageContent = message.cleanContent;
-    console.log(`${message.author.username} : ${messageContent}`);
+    let messageContent = message.cleanContent.trim();
+
     if (messageContent.startsWith(attentionChar)) {
         // Clean message content
-        messageContent = messageContent.trim(attentionChar).trim();
+        messageContent = messageContent.substring(1, messageContent.length).trim();
 
         // TODO Define commands properly in other files
         if (messageContent.startsWith('github')) {
-            message.reply(`${message.author} <https://github.com/paulloz/bip-boup.git>`);
+            message.reply(`<https://github.com/paulloz/bip-boup.git>`);
         }
     }
 });
