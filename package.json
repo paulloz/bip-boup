@@ -1,0 +1,15 @@
+{
+  "name": "bip-boup",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bip-boup.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node bip-boup.js"
+  },
+  "author": "Paul Joannon <hello@pauljoannon.com>",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^11.2.1"
+  }
+}
