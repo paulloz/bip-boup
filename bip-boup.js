@@ -30,6 +30,7 @@ bipboup.on('message', message => {
         if (messageContent.length <= 0) return; // Safety
 
         if (messageContent[0] == 'help') {
+            help(message, messageContent);
         } else {
             for (let command of commands) {
                 if (messageContent[0] == command.command) {
@@ -41,7 +42,15 @@ bipboup.on('message', message => {
     }
 });
 
+// TODO Move this in a command file (but we need access to the `commands` array)
 const help = (message, words) => {
+    // TODO check words to see if we need only part of the help text
+    // Build the help text
+    let helpText = '';
+    for (let command of commands) {
+        helpText += `\n!${command.command} : ${command.help}`;
+    }
+    message.reply(helpText);
 };
 
 const startup = () => {
