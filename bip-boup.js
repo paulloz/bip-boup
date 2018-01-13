@@ -22,6 +22,9 @@ bipboup.on('ready', () => {
 
 // Respond to messages
 bipboup.on('message', message => {
+    // Make sure we de not reply to our own messages
+    if (message.author.id == bipboup.user.id) return;
+
     let messageContent = message.cleanContent.trim().match(attentionRegexp);
 
     if (messageContent != null) {
