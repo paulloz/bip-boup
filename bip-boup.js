@@ -3,7 +3,9 @@ const Discord = require('discord.js');
 
 const bipboup = new Discord.Client();
 
+// Define how people will get the bot's attention
 const attentionChar = '!';
+const attentionRegexp = new RegExp(`^${attentionChar}(.*)`);
 
 console.log('Starting up...');
 
@@ -19,14 +21,15 @@ bipboup.on('ready', () => {
 
 // Respond to messages
 bipboup.on('message', message => {
-    let messageContent = message.cleanContent.trim();
+    let messageContent = message.cleanContent.trim().match(attentionRegexp);
 
-    if (messageContent.startsWith(attentionChar)) {
-        // Clean message content
-        messageContent = messageContent.substring(1, messageContent.length).trim();
+    if (messageContent != null) {
+        // Split message content into words
+        messageContent = messageContent[1].split(/\s+/).filter(word => word.length > 0);
+        if (messageContent.length <= 0) return; // Safety
 
         // TODO Define commands properly in other files
-        if (messageContent.startsWith('github')) {
+        if (messageContent[0] == 'github') {
             message.reply(`<https://github.com/paulloz/bip-boup.git>`);
         }
     }
