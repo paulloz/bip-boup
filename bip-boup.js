@@ -1,7 +1,9 @@
 const Fs = require('fs');
-
 const Discord = require('discord.js');
+
 const bipboup = new Discord.Client();
+
+const attentionChar = '!';
 
 console.log('Starting up...');
 
@@ -13,6 +15,21 @@ bipboup.on('ready', () => {
         console.log('Shuting down...');
         bipboup.destroy().then(() => process.exit());
     });
+});
+
+// Respond to messages
+bipboup.on('message', message => {
+    let messageContent = message.cleanContent;
+    console.log(`${message.author.username} : ${messageContent}`);
+    if (messageContent.startsWith(attentionChar)) {
+        // Clean message content
+        messageContent.trim(attentionChar).trim();
+
+        // TODO Define commands properly in other files
+        if (messageContent.startsWith('github')) {
+            message.reply(`${message.author} <https://github.com/paulloz/bip-boup.git>`);
+        }
+    }
 });
 
 // Connect from the token found in the .token file
