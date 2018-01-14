@@ -6,10 +6,18 @@ const attentionRegexp = new RegExp(`^${attentionChar}(.*)`);
 module.exports = (bipboup, commands) => {
     // TODO Move this in a command file (but we need access to the `commands` array)
     const help = (message, words) => {
-        // TODO check words to see if we need only part of the help text
-        // Reply with the help text
-        // TODO Order alphabeticaly
-        message.reply([''].concat(commands.map(command => `!${command.command} : ${command.help}`)).join('\n'));
+        const helpFor = (command) => `!${command.command} : ${command.help}`;
+        if (words.length === 2) {
+            const command = commands.find(command => command.command === words[1]);
+            if (command != null)
+                message.reply('\n' + helpFor(command));
+            else
+                message.reply(`La commande !${words[1]} n'existe pas.`);
+        } else {
+            // Reply with the full help text
+            // TODO Order alphabeticaly
+            message.reply(['Voici la liste des commandes disponibles :'].concat(commands.map(command => helpFor(command))).join('\n'));
+        }
     };
 
     // Respond to messages
