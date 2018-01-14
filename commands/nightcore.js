@@ -18,9 +18,12 @@ module.exports.callback = (message, words) => {
                 const parser = new HtmlParser.Parser({
                     onopentag: (name, attribs) => {
                         if (done) return;
-                        if (name === 'a' && attribs.href.indexOf('/watch') === 0 && attribs.title != null) {
-                            message.reply(RepliedURL(attribs.href));
-                            done = true;
+                        if (name === 'a' && attribs.href.indexOf('/watch') === 0) {
+                            // Somewhat filter the results
+                            if (attribs.title != null && attribs.title.toLowerCase().indexOf('nightcore') >= 0) {
+                                message.reply(RepliedURL(attribs.href));
+                                done = true;
+                            }
                         }
                     }
                 });
@@ -28,7 +31,7 @@ module.exports.callback = (message, words) => {
                 parser.end();
 
                 if (!done)
-                    message.reply('Je n\'ai rien trouvé :frowning:.')
+                    message.reply('Je n\'ai rien trouvé de satisfaisant :frowning:')
             });
         });
     } else {
