@@ -4,9 +4,8 @@
   "description": "",
   "main": "bip-boup.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node bip-boup.js",
-    "testcommand": "node test-command.js"
+    "test-command": "node test-command.js"
   },
   "repository": {
     "type": "git",

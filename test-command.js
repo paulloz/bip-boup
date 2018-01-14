@@ -1,17 +1,25 @@
 if (process.argv.length < 3) process.exit();
 
-const Readline = require('readline');
 const Command = require(`./commands/${process.argv[2]}.js`);
+const MessageMock = {
+    reply : console.log,
+    channel : { send : console.log }
+};
 
-const rl = Readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+const callCommand = (words) => Command.callback(MessageMock, [process.argv[2]].concat(words));
 
-rl.question('> ', answer => {
-    Command.callback({
-        reply : console.log,
-        channel : { send : console.log }
-    }, answer.split(/\s+/).filter(str => str.length > 0));
-    rl.close();
-});
+if (process.argv.length > 3) {
+    callCommand(process.argv.slice(3).filter(str => str.length > 0));
+} else {
+    const Readline = require('readline');
+
+    const rl = Readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    rl.question('> ', answer => {
+        callCommand(answer.split(/\s+/).filter(str => str.length > 0));
+        rl.close();
+    });
+}
