@@ -2,7 +2,7 @@ const Https = require('https');
 const HtmlParser = require('htmlparser2');
 
 module.exports.command = 'nightcore';
-module.exports.help = 'Recherche du nightcore sur YouTube';
+module.exports.help = 'Recherche du nightcore sur YouTube.';
 
 const URL = query => `https://www.youtube.com/results?sp=EgIQAQ%253D%253D&search_query=${query}`;
 const RepliedURL = query => `https://www.youtube.com${query}`;
