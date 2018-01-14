@@ -8,7 +8,11 @@ A Discord bot doing ???
 * Lancer `npm start`
 * Apprécier le bip boup
 
-## Ajouter des commandes
+## Contribution
+
+Merci de garder l'historique git propre et d'éviter les merge commits inutiles avant de créer une pull request.
+
+### Ajouter des commandes
 
 Chaque fichier contenu dans le dossier [commands/](/commands) est chargé au lancement du robot.  
 Les fichiers de commandes doivent exporter les propriétés suivantes :
@@ -25,7 +29,7 @@ module.exports.callback = (message, words) => {
 };
 ```
 
-### Test
+### Tester les commandes
 
 Il est possible de tester les commandes hors de l'environnement Discord via la commande `npm run test-command` :
 ```sh
