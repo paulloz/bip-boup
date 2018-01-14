@@ -1,6 +1,6 @@
 if (process.argv.length < 3) process.exit();
 
-const Command = require(`./commands/${process.argv[2]}.js`);
+const Command = require(`../commands/${process.argv[2]}.js`);
 const MessageMock = {
     reply : console.log,
     channel : { send : console.log }

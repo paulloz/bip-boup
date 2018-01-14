@@ -5,7 +5,7 @@
   "main": "bip-boup.js",
   "scripts": {
     "start": "node bip-boup.js",
-    "test-command": "node test-command.js"
+    "test-command": "node tests/test-command.js"
   },
   "repository": {
     "type": "git",
