@@ -11,7 +11,7 @@ module.exports.callback = (message, words) => {
         "bnm content", ["8/10", "with rice 10/10"], "TÛT TÛT LES JALOUX", "Telerama a aimé, moi non",
         "Ça vaut vraiment pas le premier...", "chef d'œuvre", "vous feriez mieux de regarder Mad Max",
         "quelques rares défauts mais un excellent moment",
-        `${EmojiOrNothing(message.channel, 'baby')} qui pleure`,
+        ":baby: qui pleure",
         "RT car c triss", "j'en sais rien, je connais pas", "bon somnifère", "mieux que du café"
     ];
 
