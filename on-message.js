@@ -25,7 +25,7 @@ module.exports = (bipboup, commands) => {
         // Make sure we de not reply to our own messages
         if (message.author.id == bipboup.user.id) return;
 
-        let messageContent = message.cleanContent.trim().match(attentionRegexp);
+        let messageContent = message.content.trim().match(attentionRegexp);
 
         if (messageContent != null) {
             // Split message content into words
