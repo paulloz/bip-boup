@@ -20,6 +20,7 @@ const startup = () => {
     });
 
     require(Path.join(__dirname, 'on-message.js'))(bipboup, commands);
+    require(Path.join(__dirname, 'on-emoji.js'))(bipboup);
 
     Fs.readdir(Path.join(__dirname, 'commands'), (err, files) => {
         if (err == null) {
