@@ -1,20 +1,21 @@
 const Fs = require('fs');
 const Path = require('path');
+const Winston = require('winston');
 const Discord = require('discord.js');
 
 const startup = () => {
-    console.log('Starting up...');
+    Winston.log('info', 'Starting up...');
 
     const bipboup = new Discord.Client();
 
     let commands = [];
 
     bipboup.on('ready', () => {
-        console.log('I\'m connected to the Discord guild!');
+        Winston.log('info', 'I\'m connected to the Discord network!');
 
         // Properly close connection on Ctrl-C
         process.on('SIGINT', () => {
-            console.log('Shuting down...');
+            Winston.log('info', 'Shutting down...');
             bipboup.destroy().then(() => process.exit());
         });
     });
@@ -44,7 +45,7 @@ const startup = () => {
         if (err == null)
             bipboup.login(data.trimRight());
         else
-            console.error(err.message);
+            Winston.log('error', err.message);
     });
 };
 
