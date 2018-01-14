@@ -26,6 +26,9 @@ module.exports.callback = (message, words) => {
                 });
                 parser.write(htmlBody);
                 parser.end();
+
+                if (!done)
+                    message.reply('Je n\'ai rien trouvé :frowning:.')
             });
         });
     } else {
