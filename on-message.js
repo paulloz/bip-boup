@@ -6,13 +6,13 @@ const attentionRegexp = new RegExp(`^${attentionChar}(.*)`);
 module.exports = (bipboup, commands) => {
     // TODO Move this in a command file (but we need access to the `commands` array)
     const help = (message, words) => {
-        const helpFor = (command) => `!${command.command} : ${command.help}`;
+        const helpFor = (command) => `${attentionChar}${command.command} : ${command.help}`;
         if (words.length === 2) {
             const command = commands.find(command => command.command === words[1]);
             if (command != null)
                 message.reply('\n' + helpFor(command));
             else
-                message.reply(`La commande !${words[1]} n'existe pas.`);
+                message.reply(`La commande ${attentionChar}${words[1]} n'existe pas.`);
         } else {
             // Reply with the full help text
             // TODO Order alphabeticaly
