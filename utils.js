@@ -11,7 +11,7 @@ module.exports.HttpsGet = (url, callback) => {
 
     return Https.get({
         hostname: url.hostname,
-        path: url.pathname,
+        path: url.pathname + url.search,
         headers: {
             'User-Agent': 'Bip Boup/1.0.0'
         }
