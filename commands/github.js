@@ -1,7 +1,7 @@
 const { HttpsGetJson, BooleanEmoji } = require('../utils.js');
 
 module.exports.command  = 'github'
-module.exports.help     = 'Envoie l\'adresse du dépôt GitHub de mon code source.'
+module.exports.help     = 'Quelques informations sur mon code source.'
 
 const baseAPI = "https://api.github.com/repos/paulloz/bip-boup";
 const basePullRequestAPI = `${baseAPI}/pulls`;
