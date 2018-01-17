@@ -2,6 +2,7 @@ const Https = require('https');
 const { URL } = require('url');
 
 module.exports.EmojiOrNothing = (channel, emoji) => channel.guild != null ? channel.guild.emojis.find('name', emoji) || '' : ''
+module.exports.BooleanEmoji = (b) => b ? ':white_check_mark:' : ':negative_squared_cross_mark:';
 
 module.exports.HttpsGet = (url, callback) => {
     // Need an URL object
