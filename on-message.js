@@ -6,7 +6,7 @@ const attentionRegexp = new RegExp(`^${attentionChar}(.*)`);
 module.exports = (bipboup, commands) => {
     // TODO Move this in a command file (but we need access to the `commands` array)
     const help = (message, words) => {
-        const helpFor = (command) => `${attentionChar}${command.command} : ${command.help}`;
+        const helpFor = (command) => `**${attentionChar}${command.command}** : ${command.help}`;
         if (words.length === 2) {
             const command = commands.find(command => command.command === words[1]);
             if (command != null)
@@ -16,7 +16,7 @@ module.exports = (bipboup, commands) => {
         } else {
             // Reply with the full help text
             // TODO Order alphabeticaly
-            message.reply(['Voici la liste des commandes disponibles :'].concat(commands.map(command => helpFor(command))).join('\n'));
+            message.reply(['Voici la liste des commandes disponibles :'].concat(commands.map(command => `\t- ${helpFor(command)}`)).join('\n'));
         }
     };
 
