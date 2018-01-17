@@ -25,3 +25,5 @@ module.exports.HttpsGet = (url, callback) => {
         });
     });
 };
+
+module.exports.HttpsGetJson = (url, callback) => module.exports.HttpsGet(url, (htmlBody) => callback(JSON.parse(htmlBody)));
