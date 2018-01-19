@@ -1,4 +1,4 @@
-const { HttpsGetJson, BooleanEmoji } = require('../utils.js');
+const { HttpsGetJson, BooleanEmoji, Plural } = require('../utils.js');
 
 module.exports.command  = 'github'
 module.exports.help     = 'Quelques informations sur mon code source.'
@@ -31,7 +31,7 @@ module.exports.callback = (message, words) => {
 
         if (words.length <= 2) {
             HttpsGetJson(basePullRequestAPI, (json) => {
-                let reply = `Il y a actuellement ${json.length} pull request${json.length > 1 ? 's' : ''} en attente${json.length > 0 ? ' :' : ''}`;
+                let reply = `Il y a actuellement ${json.length} pull ${Plural('request', json)} en attente${json.length ? ' :' : ''}`;
                 for (let item of json)
                     reply += `\n\t- ${formatPR(item)}`
                 message.channel.send(reply);
@@ -69,7 +69,7 @@ module.exports.callback = (message, words) => {
         if (words.length <= 2) {
             HttpsGetJson(baseIssuesAPI, (json) => {
                 json = json.filter(item => item.pull_request == null);
-                let reply = `Il y a actuellement ${json.length} issue${json.length > 1 ? 's' : ''} ouverte${json.length > 1 ? 's :' : json.length > 0 ? ' :' : ''}`;
+                let reply = `Il y a actuellement ${json.length} ${Plural('issue', json)} ${Plural('ouverte', json)}${json.length ? ' :' : ''}`;
                 for (let item of json)
                     reply += `\n\t- ${formatIssue(item)}`
                 message.channel.send(reply);
