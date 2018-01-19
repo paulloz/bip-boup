@@ -68,8 +68,9 @@ module.exports.callback = (message, words) => {
 
         if (words.length <= 2) {
             HttpsGetJson(baseIssuesAPI, (json) => {
+                json = json.filter(item => item.pull_request == null);
                 let reply = `Il y a actuellement ${json.length} issue${json.length > 1 ? 's' : ''} ouverte${json.length > 1 ? 's :' : json.length > 0 ? ' :' : ''}`;
-                for (let item of json.filter(item => item.pull_request == null))
+                for (let item of json)
                     reply += `\n\t- ${formatIssue(item)}`
                 message.channel.send(reply);
             });
