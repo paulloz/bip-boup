@@ -8,7 +8,6 @@ const basePullRequestAPI = `${baseAPI}/pulls`;
 const baseIssuesAPI = `${baseAPI}/issues`;
 
 module.exports.callback = (message, words) => {
-
     const handlePRs = () => {
         const formatPR = (pr, short = true) => {
             const idTitleAuthor = `**#${pr.number}** ${pr.title} par **${pr.user.login}**`;

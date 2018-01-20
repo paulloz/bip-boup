@@ -45,12 +45,9 @@ const startup = () => {
                         bipboup.config.commands.push({
                             command: command,
                             help: help,
-                            callback: callback
+                            callback: setup ? callback(bipboup.config) : callback
                         });
                     }
-
-                    if (setup != null)
-                        setup(bipboup.config);
                 }
             });
         }
