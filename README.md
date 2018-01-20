@@ -25,6 +25,7 @@ Exemple :
 ```javascript
 module.exports.command  = 'spreadlove'
 module.exports.help     = 'Répendre un peu d\'amour dans ce monde de brutes.'
+module.expots.setup     = false // Optionnel
 module.exports.callback = (message, words) => {
     message.reply('❤️❤️❤️');
 };
