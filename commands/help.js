@@ -12,7 +12,6 @@ module.exports.callback = (config) => {
                 message.reply(`La commande ${attentionChar}${words[1]} n'existe pas.`);
         } else {
             // Reply with the full help text
-            // TODO Order alphabeticaly
             message.reply(['Voici la liste des commandes disponibles :'].concat(config.commands.map(command => `\t- ${helpFor(command)}`)).join('\n'));
         }
     };
