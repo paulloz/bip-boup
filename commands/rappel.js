@@ -9,13 +9,15 @@ module.exports.help = 'Renvoie un message après un temps défini.';
 const storage = '.queue.json';
 
 const addOnStorage = (job) => {
+    removeFromStorage(job.uuid); // Make sure there's no dups
     Fs.readFile(storage, 'utf8', (err, data) => {
         if (err == null || err.code === 'ENOENT') {
             job.sendAt = job.sendAt.valueOf();
-            Fs.writeFileSync(storage, JSON.stringify(JSON.parse(data || "[]").concat([job])), 'utf8');
+            Fs.writeFileSync(storage, JSON.stringify(JSON.parse(data || '[]').concat([job])), 'utf8');
         }
     });
 };
+
 const removeFromStorage = (uuid) => {
     Fs.readFile(storage, 'utf8', (err, data) => {
         if (err == null) {
@@ -26,6 +28,12 @@ const removeFromStorage = (uuid) => {
                     Fs.unlinkSync(storage); // If there's an error inside the file, delete it
             }
         }
+    });
+};
+
+const withStorageContent = (callback) => {
+    Fs.readFile(storage, 'utf8', (err, data) => {
+        if (err == null || err.code === 'ENOENT') callback(JSON.parse(data || '[]'));
     });
 };
 
@@ -43,19 +51,33 @@ const parse = (toParse, createdTimeStamp) => {
     return getChronoMatches(toParse, Moment(createdTimeStamp)).shift();
 };
 
-module.exports.callback = (message, words) => {
-    const sendAndSaveToDisk = (job) => {
-        if (job == null) return false;
+const sendOnChannelAndRemoveFromDisk = (job, channel) => {
+    if (channel == null) return;
+    setTimeout(() => {
+        removeFromStorage(job.uuid);
+        channel.send(job.text);
+    }, job.sendAt - Moment());
+};
 
-        job.uuid = job.uuid || Uuidv1();
-        addOnStorage(job);
-        setTimeout(() => {
-            removeFromStorage(job.uuid);
-            message.channel.send(job.text);
-        }, job.sendAt - Moment());
+module.exports.setup = true;
+module.exports.callback = (bipboup) => {
+    withStorageContent((jobs) => {
+        jobs.map(j => { j.sendAt = Moment(j.sendAt); return j; }).filter(j => j.sendAt >= Moment()).forEach((j) => {
+            sendOnChannelAndRemoveFromDisk(j, bipboup.channels.get(j.channel));
+        });
+    });
 
-        return true;
+    return (message, words) => {
+        const sendAndSaveToDisk = (job) => {
+            if (job == null) return false;
+
+            job.uuid = job.uuid || Uuidv1();
+            job.channel = message.channel.id;
+            addOnStorage(job);
+            sendOnChannelAndRemoveFromDisk(job, message.channel)
+            return true;
+        };
+
+        message.react(sendAndSaveToDisk(parse(words.slice(1).join(' '), message.createdTimeStamp)) ? '👌' : '👎');
     };
-
-    message.react(sendAndSaveToDisk(parse(words.slice(1).join(' '), message.createdTimeStamp)) ? '👌' : '👎');
 };
