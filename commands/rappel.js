@@ -5,40 +5,29 @@ module.exports.command = 'rappel';
 module.exports.help = 'Renvoie un message après un temps défini.';
 
 module.exports.callback = (message, words) => {
-    let messageContent;
+    const parseAndHandle = (toParse) => {
+        // TODO Do some smart things to clean the message
+        const getMessageText = (full, sIdx, eIdx) => full.substring(...((sIdx > full.length - eIdx) ? [0, sIdx] : [eIdx])).trim();
 
-    words = words.slice(1).join(' ');
+        const getChronoMatches = (toParse, sentAt) => chrono.parse(toParse).filter(
+            m => Object.keys(m.tags).filter(k => k.startsWith('FR')).length > 0
+        ).map(m => Object({
+            sendAt: moment(chrono.parseDate(m.text, sentAt)),
+            text: getMessageText(toParse, m.index, m.index + m.text.length)
+        })).filter(m => m.sendAt > sentAt && m.text.length > 0);
 
-    let matches = chrono.parse(words);
-    if (matches.length > 0) {
-        for (let match of matches) {
-            if (Object.keys(match.tags).filter(k => k.startsWith('FR'))) {
-                let sendAt = moment(chrono.parseDate(match.text, moment(message.createdTimestamp)));
-                let time = sendAt - moment();
+        let match;
+        if ((match = getChronoMatches(toParse, moment(message.createdTimeStamp)).shift()) != null) {
+            // TODO Store on disk
+            setTimeout(() => {
+                // TODO Remove from storage
+                message.channel.send(match.text);
+            }, match.sendAt - moment());
 
-                if (messageContent == null) {
-                    messageContent = words.substring(match.index + match.text.length);
-                    if (match.index > messageContent.length)
-                        messageContent = words.substring(0, match.index);
-                }
-
-                // TODO Do some smart things to clean the message
-                messageContent = messageContent.trim();
-
-                if (time > 0 && messageContent.length > 0) {
-                    // TODO Store on disk
-                    setTimeout(() => {
-                        // TODO Remove from storage
-                        message.channel.send(messageContent);
-                    }, time);
-
-                    message.react('👌');
-
-                    return;
-                }
-            }
+            return true;
         }
-    }
+        return false;
+    };
 
-    message.react('👎');
+    message.react(parseAndHandle(words.slice(1).join(' ')) ? '👌' : '👎');
 };
