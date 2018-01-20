@@ -19,6 +19,7 @@ Les fichiers de commandes doivent exporter les propriétés suivantes :
 * `command` : le mot devant déclencher la commande
 * `help` : le texte d'aide accompagnant la commande
 * `callback` : la fonction devant être appelée pour traiter la commandes
+* `setup` : si mis à `true`, `callback` doit être dans une closure recevant un objet `config` en paramètre
 
 Exemple :
 ```javascript
