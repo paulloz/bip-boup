@@ -37,6 +37,7 @@ module.exports.callback = (message, words) => {
         for (let match of matches) {
             if (Object.keys(match.tags).filter(k => k.startsWith('FR'))) {
                 let sendAt = moment(chrono.parseDate(match.text, moment(message.createdTimestamp)));
+                let time = sendAt - moment();
 
                 if (messageContent == null) {
                     messageContent = words.substring(match.index + match.text.length);
@@ -47,12 +48,12 @@ module.exports.callback = (message, words) => {
                 // TODO Do some smart things to clean the message
                 messageContent = messageContent.trim();
 
-                if (messageContent.length > 0) {
+                if (time > 0 && messageContent.length > 0) {
                     // TODO Store on disk
                     setTimeout(() => {
                         // TODO Remove from storage
                         message.channel.send(messageContent);
-                    }, sendAt - moment());
+                    }, time);
 
                     message.react('👌');
 
