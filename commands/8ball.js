@@ -17,14 +17,15 @@ module.exports.callback = (message, words) => {
 
     function roll(wt, n) {
         setTimeout(function() {
-            let str = ".";
-            for(var i = 0; i < n; i++) {
-                str+= " ";
-            }
-            message.channel.send(str + ":right_facing_fist::8ball::left_facing_fist:");
             if (wt >= 4500) {
-                message.reply(fortunes[Math.floor(Math.random() * Math.floor(fortunes.length))]);
+                setTimeout(function() {
+                    message.reply(fortunes[Math.floor(Math.random() * Math.floor(fortunes.length))]);
+                    return;
+                },1000);
             }
+            let str = ".";
+            str+= " ".repeat(Math.abs(n));
+            message.channel.send(str + ":right_facing_fist::8ball::left_facing_fist:");
         }, wt);
     }
 };
