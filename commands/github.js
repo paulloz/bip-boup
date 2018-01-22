@@ -13,7 +13,8 @@ module.exports.callback = (message, words) => {
         return new Discord.RichEmbed({
             author: {
                 name: json.user.login,
-                icon_url: json.user.avatar_url
+                icon_url: json.user.avatar_url,
+                url: json.user.html_url
             },
             title: `#${json.number} ${json.title}`,
             url: json.html_url,
@@ -26,9 +27,9 @@ module.exports.callback = (message, words) => {
             HttpsGetJson(`${basePullRequestAPI}/${num}`, (json) => {
                 // Handle not found
                 if (!(json.message != null && json.message === 'Not Found')) {
-                    message.channel.send(embed(json).setColor(
-                        json.mergeable_state == 'clean' ? 'GREEN' : 'RED'
-                    ).setFooter(`${json.commits} ${Plural('commit', json.commits)} | ${json.changed_files} ${Plural('fichier', json.changed_files)} | +${json.additions} -${json.deletions}`));
+                    message.channel.send(embed(json).setColor(json.mergeable_state == 'clean' ? 'GREEN' : 'RED')
+                        .addField('Base', json.base.label, true).addField('Head', json.head.label, true)
+                        .setFooter(`${json.commits} ${Plural('commit', json.commits)}, ${json.changed_files} ${Plural('fichier', json.changed_files)}, +${json.additions} -${json.deletions}`));
                 }
             });
         };
@@ -52,7 +53,9 @@ module.exports.callback = (message, words) => {
             HttpsGetJson(`${baseIssuesAPI}/${num}`, (json) => {
                 // Handle not found and PR
                 if (!(json.message != null && json.message === 'Not Found') && json.pull_request == null)
-                    message.channel.send(embed(json));
+                    message.channel.send(embed(json).setColor(
+                        json.labels.length > 0 ? json.labels[0].color : 'DEFAULT'
+                    ).setFooter(json.labels.reduce((acc, x) => `${acc} ${x.name}`, '')));
             })
         };
 
