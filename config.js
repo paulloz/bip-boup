@@ -59,7 +59,7 @@ class Config {
     }
 
     get(key, guild) {
-        return this.data[(guild || {}).id || 'general'][key];
+        return this.data[(guild || {}).id || 'general'][key] || this.data.general[key];
     }
 
     hasCommand(command) {
