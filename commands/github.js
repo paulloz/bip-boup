@@ -51,10 +51,8 @@ module.exports.callback = (message, words) => {
         const handleIssue = (num) => {
             HttpsGetJson(`${baseIssuesAPI}/${num}`, (json) => {
                 // Handle not found and PR
-                if (!(json.message != null && json.message === 'Not Found') && json.pull_request == null) {
-                    console.log(json);
+                if (!(json.message != null && json.message === 'Not Found') && json.pull_request == null)
                     message.channel.send(embed(json));
-                }
             })
         };
 
@@ -62,7 +60,6 @@ module.exports.callback = (message, words) => {
             HttpsGetJson(baseIssuesAPI, (json) => {
                 json = json.filter(item => item.pull_request == null);
                 let embed = new Discord.RichEmbed();
-                console.log(embed.fields.length);
                 for (let item of json)
                     embed.addField(`#${item.number} ${item.title}`, item.html_url);
                 message.channel.send(embed.setFooter(`${json.length} ${Plural('ticket', json)} actuellement ${Plural('ouvert', json)}.`));
