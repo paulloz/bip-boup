@@ -1,6 +1,8 @@
 const Https = require('https');
 const { URL } = require('url');
 
+module.exports.GetInConf = (key, conf, guild) => (conf[(guild || { }).id] || conf.general)[key] || conf.general[key];
+
 module.exports.EmojiOrNothing = (channel, emoji) => channel.guild != null ? channel.guild.emojis.find('name', emoji) || '' : ''
 
 module.exports.Plural = (word, arr) => `${word}${(typeof(arr) == typeof([]) ? arr.length : arr) > 1 ? 's' : ''}`

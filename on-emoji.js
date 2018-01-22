@@ -1,9 +1,15 @@
+const Config = require('./config.js');
+
 module.exports = (bipboup) => {
     bipboup.on('emojiCreate', (emoji) => {
-        // TODO Tell everyone an emoji was created
+        let chan = Config.get('mainchan', emoji.guild);
+        if (chan != null)
+            bipboup.channels[chan].send(`Nouvel emote : ${emoji} !`);
     });
 
     bipboup.on('emojiDelete', (emoji) => {
-        // TODO Tell everyone an emoji was deleted
+        let chan = Config.get('mainchan', emoji.guild);
+        if (chan != null)
+            bipboup.channels[chan].send(`Emote supprimé : ${emoji}`);
     });
 };

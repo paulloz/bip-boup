@@ -1,13 +1,15 @@
+const Config = require('./config.js');
+
 module.exports = (bipboup) => {
     // TODO Change this to enable commands after a mention
-    const attentionRegexp = new RegExp(`^${bipboup.config.attentionChar}(.*)`);
+    const attentionRegexp = (char) => new RegExp(`^${char}(.*)`);
 
     // Respond to messages
     bipboup.on('message', message => {
         // Make sure we de not reply to our own messages
         if (message.author.id == bipboup.user.id) return;
 
-        let messageContent = message.content.trim().match(attentionRegexp);
+        let messageContent = message.content.trim().match(attentionRegexp(Config.get('attention', message.guild)));
 
         if (messageContent != null) {
             // Split message content into words

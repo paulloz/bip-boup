@@ -2,6 +2,7 @@ const Fs = require('fs');
 const Path = require('path');
 const Winston = require('winston');
 const Discord = require('discord.js');
+const Config = require('./config.js')
 
 const startup = () => {
     Winston.log('info', 'Starting up...');
@@ -10,7 +11,6 @@ const startup = () => {
     let isInit = false;
 
     bipboup.config = {
-        attentionChar : '!', // Define how people will get the bot's attention
         commands : []
     };
 

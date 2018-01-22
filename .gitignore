@@ -1,6 +1,8 @@
 # Node dependencies
 node_modules/
 
+# Config file
+config.json
 # Token file
 .token
 # Queue file
