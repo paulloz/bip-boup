@@ -6,10 +6,13 @@ const MessageMock = {
     channel : { send : console.log , id : 'lol' },
     react : (str) => console.log(`-> ${str}`)
 };
+const BipBoupMock = {
+    channels : { get : () => MessageMock.channel },
+};
 
 const callCommand = (words) => {
     if (Command.setup)
-        return Command.callback({})(MessageMock, [process.argv[2]].concat(words));
+        return Command.callback(BipBoupMock)(MessageMock, [process.argv[2]].concat(words));
     else
         return Command.callback(MessageMock, [process.argv[2]].concat(words));
 };

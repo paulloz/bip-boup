@@ -22,10 +22,12 @@ const removeFromStorage = (uuid) => {
     Fs.readFile(storage, 'utf8', (err, data) => {
         if (err == null) {
             try {
-                Fs.writeFileSync(storage, JSON.stringify(JSON.parse(data).filter(x => x.uuid != uuid && moment(x.sendAt) >= moment())), 'utf8');
+                Fs.writeFileSync(storage, JSON.stringify(JSON.parse(data || []).filter(x => x.uuid != uuid && Moment(x.sendAt) >= Moment())), 'utf8');
             } catch (e) {
-                if (e instanceof SyntaxError)
+                if (e instanceof SyntaxError){
                     Fs.unlinkSync(storage); // If there's an error inside the file, delete it
+                }
+                throw e;
             }
         }
     });
