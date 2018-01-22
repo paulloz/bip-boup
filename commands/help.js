@@ -9,13 +9,13 @@ module.exports.callback = (bipboup) => {
         const helpFor = (command) => `**${Config.get('attention', message.guild)}${command.command}** : ${command.help}`;
         if (words.length === 2) {
             const command = bipboup.config.commands.find(command => command.command === words[1]);
-            if (command != null)
+            if (Config.hasCommand(command))
                 message.reply('\n' + helpFor(command));
             else
                 message.reply(`La commande ${attentionChar}${words[1]} n'existe pas.`);
         } else {
             // Reply with the full help text
-            message.reply(['Voici la liste des commandes disponibles :'].concat(bipboup.config.commands.map(command => `\t- ${helpFor(command)}`)).join('\n'));
+            message.reply(['Voici la liste des commandes disponibles :'].concat(Config.getCommands().map(command => `\t- ${helpFor(command)}`)).join('\n'));
         }
     };
 };

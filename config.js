@@ -1,5 +1,17 @@
 const Fs = require('fs');
 
+class Command {
+    constructor(command, help, callback) {
+        this.command = command;
+        this.help = help;
+        this.callback = callback;
+    }
+
+    call(...params) {
+        this.callback(...params)
+    }
+}
+
 class Config {
     constructor() {
         this.defaults = {
@@ -10,7 +22,7 @@ class Config {
 
         this.fileName = 'config.json';
         this.data = { };
-        this.commands = [ ];
+        this.commands = { };
 
         this.readFromDisk();
     }
@@ -48,6 +60,23 @@ class Config {
 
     get(key, guild) {
         return this.data[(guild || {}).id || 'general'][key];
+    }
+
+    hasCommand(command) {
+        return this.commands[command] != null;
+    }
+
+    addCommand(command, help, callback) {
+        if (!this.hasCommand(command))
+            this.commands[command] = new Command(command, help, callback);
+    }
+
+    getCommand(command) {
+        return this.commands[command];
+    }
+
+    getCommands() {
+        return Object.values(this.commands);
     }
 }
 

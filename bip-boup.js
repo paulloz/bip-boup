@@ -22,13 +22,8 @@ const startup = () => {
                         const {command, help, callback, setup} = require(Path.join(__dirname, 'commands', file));
                         if (command == null || help == null || callback == null) return;
 
-                        if (bipboup.config.commands.find(c => c.command === command) == null) {
-                            bipboup.config.commands.push({
-                                command: command,
-                                help: help,
-                                callback: setup ? callback(bipboup) : callback
-                            });
-                        }
+                        if (!Config.hasCommand(command))
+                            Config.addCommand(command, help, setup ? callback(bipboup) : callback);
                     }
                 });
             }

@@ -16,12 +16,8 @@ module.exports = (bipboup) => {
             messageContent = messageContent[1].split(/\s+/).filter(word => word.length > 0);
             if (messageContent.length <= 0) return; // Safety
 
-            for (let command of bipboup.config.commands) {
-                if (messageContent[0] == command.command) {
-                    command.callback(message, messageContent);
-                    break;
-                }
-            }
+            if (Config.hasCommand(messageContent[0]))
+                Config.getCommand(messageContent[0]).call(message, messageContent);
         }
     });
 };
