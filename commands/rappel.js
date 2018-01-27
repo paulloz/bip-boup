@@ -76,7 +76,11 @@ module.exports.callback = (bipboup) => {
             job.uuid = job.uuid || Uuidv1();
             job.channel = message.channel.id;
             addOnStorage(job);
-            sendOnChannelAndRemoveFromDisk(job, message.channel)
+            sendOnChannelAndRemoveFromDisk(job, message.channel, message)
+            setTimeout(() => {
+                if (message.deletable)
+                    message.delete();
+            }, 100);
             return true;
         };
 
