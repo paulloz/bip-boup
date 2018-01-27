@@ -7,25 +7,15 @@ module.exports.callback = (message, words) => {
         "Tu peux compter dessus","Sans aucun doute","Très probable","Oui","C'est bien parti","C'est non",
         "Peu probable","Faut pas rêver","N'y compte pas","Impossible"
     ];
+    const gif = [
+        "http://gph.is/2jWTPPf","http://gph.is/2iZqHD9","http://gph.is/2tdjYNH","http://gph.is/2sI6Igk",
+        "http://gph.is/2mUXGgg","http://gph.is/2mRFnW0","http://gph.is/2pGyYTO"
+    ];
 
-    let n = 5;
-
-    for (var i = 0; i < 10; i++) {
-        roll(i*500,n);
-        n += Math.floor(Math.random() * Math.floor(5)) - 2;
-    }
-
-    function roll(wt, n) {
+    message.channel.send(gif[Math.floor(Math.random() * Math.floor(gif.length))]).then(thisMessage => {
         setTimeout(function() {
-            if (wt >= 4500) {
-                setTimeout(function() {
-                    message.reply(fortunes[Math.floor(Math.random() * Math.floor(fortunes.length))]);
-                    return;
-                },1000);
-            }
-            let str = ".";
-            str+= " ".repeat(Math.abs(n));
-            message.channel.send(str + ":right_facing_fist::8ball::left_facing_fist:");
-        }, wt);
-    }
+            thisMessage.delete();
+            message.reply(fortunes[Math.floor(Math.random() * Math.floor(fortunes.length))]);
+        }, 7000);
+    });
 };
