@@ -14,7 +14,7 @@ module.exports.callback = (bipboup) => {
         Fs.mkdirSync(ppdir);
 
     return (message, words) => {
-        if (message.attachments.array().length > 0) {
+        const upload = () => {
             let ok = false;
             message.attachments.array().forEach(attachment => {
                 if (ok) return;
@@ -38,9 +38,7 @@ module.exports.callback = (bipboup) => {
                             let path = Path.join(ppdir, filename);
                             while (Fs.existsSync(path)) {
                                 filename = Path.basename(filename, ext).split('-');
-                                filename = filename.length > 1
-                                    ? [filename[0]].concat([String(parseInt(filename[1]) + 1)]).join('-')
-                                    : filename.concat(['1']).join('-')
+                                filename = [filename[0]].concat([String(parseInt(filename[1] || 0) + 1)]).join('-');
                                 path = Path.join(ppdir, filename + ext);
                             }
 
@@ -58,6 +56,25 @@ module.exports.callback = (bipboup) => {
 
             if (ok && message.deletable)
                 message.delete();
+
+            return ok;
+        };
+
+        if (message.attachments.array().length > 0) {
+            upload();
+        } else if (words.length === 2) {
+            Fs.readdir(ppdir, (err, files) => {
+                for (let i = 0; i < files.length; ++i) {
+                    if (Path.basename(files[i], Path.extname(files[i])) === words[1]) {
+                        bipboup.user.setAvatar(Path.join(ppdir, files[i])).then(() => {
+                            message.channel.send(':robot:');
+                        }).catch((error) => {
+                            message.reply(':warning: Je ne peux pas changer de PP maintenant !');
+                        });
+                        break;
+                    }
+                }
+            });
         }
     };
 };
