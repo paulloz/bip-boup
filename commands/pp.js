@@ -35,6 +35,7 @@ module.exports.callback = (bipboup) => {
                         result.on('end', () => {
                             let filename = attachment.filename;
                             let ext = Path.extname(filename);
+                            if (words.length > 1) filename = words[1] + ext;
                             let path = Path.join(ppdir, filename);
                             while (Fs.existsSync(path)) {
                                 filename = Path.basename(filename, ext).split('-');
@@ -55,7 +56,7 @@ module.exports.callback = (bipboup) => {
             });
 
             if (ok && message.deletable)
-                message.delete();
+                setTimeout(() => message.delete(), 100);
 
             return ok;
         };
