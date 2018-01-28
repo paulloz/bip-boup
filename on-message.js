@@ -2,7 +2,7 @@ const Config = require('./config.js');
 
 module.exports = (bipboup) => {
     // TODO Change this to enable commands after a mention
-    const attentionRegexp = (char) => new RegExp(`^${char}(.*)`);
+    const attentionRegexp = (char) => new RegExp(`^[${char}](\\w+)(\\s+.+)*`);
 
     // Respond to messages
     bipboup.on('message', message => {
@@ -13,7 +13,7 @@ module.exports = (bipboup) => {
 
         if (messageContent != null) {
             // Split message content into words
-            messageContent = messageContent[1].split(/\s+/).filter(word => word.length > 0);
+            messageContent = [messageContent[1].trim()].concat((messageContent[2] || "").split(/\s+/).filter(word => word.length > 0));
             if (messageContent.length <= 0) return; // Safety
 
             if (Config.hasCommand(messageContent[0]))
