@@ -1,3 +1,4 @@
+const { Permissions } = require('discord.js');
 const Config = require('./config.js');
 
 module.exports = (bipboup) => {
@@ -16,8 +17,10 @@ module.exports = (bipboup) => {
             messageContent = [messageContent[1].trim()].concat((messageContent[2] || "").split(/\s+/).filter(word => word.length > 0));
             if (messageContent.length <= 0) return; // Safety
 
-            if (Config.hasCommand(messageContent[0]))
-                Config.getCommand(messageContent[0]).call(message, messageContent);
+            const command = Config.hasCommand(messageContent[0]) ? Config.getCommand(messageContent[0]) : null;
+            // TODO Check permissions by guild
+            if (command != null && (!command.isAdmin() || bipboup.guilds.first().member(message.author).hasPermission(Permissions.FLAGS.ADMINISTRATOR)))
+                command.call(message, messageContent);
         }
     });
 };

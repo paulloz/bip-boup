@@ -19,11 +19,11 @@ const startup = () => {
             if (err == null) {
                 files.forEach(file => {
                     if (Path.extname(file) == '.js') {
-                        const {command, help, callback, setup} = require(Path.join(__dirname, 'commands', file));
+                        const {command, help, callback, setup, admin} = require(Path.join(__dirname, 'commands', file));
                         if (command == null || help == null || callback == null) return;
 
                         if (!Config.hasCommand(command))
-                            Config.addCommand(command, help, setup ? callback(bipboup) : callback);
+                            Config.addCommand(command, help, setup ? callback(bipboup) : callback, admin);
                     }
                 });
             }

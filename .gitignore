@@ -7,3 +7,5 @@ config.json
 .token
 # Queue file
 .queue.json
+# PP folder
+pp/

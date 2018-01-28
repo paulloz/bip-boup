@@ -1,14 +1,19 @@
 const Fs = require('fs');
 
 class Command {
-    constructor(command, help, callback) {
+    constructor(command, help, callback, admin) {
         this.command = command;
         this.help = help;
-        this.callback = callback;
+        this._callback = callback;
+        this._admin = admin;
+    }
+
+    isAdmin() {
+        return this._admin;
     }
 
     call(...params) {
-        this.callback(...params)
+        this._callback(...params)
     }
 }
 
@@ -66,17 +71,18 @@ class Config {
         return this.commands[command] != null;
     }
 
-    addCommand(command, help, callback) {
+    addCommand(command, help, callback, admin) {
         if (!this.hasCommand(command))
-            this.commands[command] = new Command(command, help, callback);
+            this.commands[command] = new Command(command, help, callback, admin);
     }
 
     getCommand(command) {
         return this.commands[command];
     }
 
-    getCommands() {
-        return Object.values(this.commands);
+    getCommands(admin) {
+        admin = admin || false;
+        return Object.values(this.commands).filter(c => admin || !c.isAdmin());
     }
 }
 
