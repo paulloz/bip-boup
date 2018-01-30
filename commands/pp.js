@@ -80,7 +80,7 @@ module.exports.callback = (bipboup) => {
             if (f != null)
                 Fs.unlink(f, (e) => message.react(e == null ? '👌' : '👎'));
             else
-                withFile(words[2], rmPP);
+                words.slice(2).forEach((file) => withFile(file, rmPP));
         };
 
         const setPP = (f) => {
