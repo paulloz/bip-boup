@@ -45,9 +45,7 @@ module.exports.callback = (bipboup) => {
 
                             Fs.writeFileSync(path, data.read(), { encoding: 'binary', flag: 'w+' });
 
-                            bipboup.user.setAvatar(path).then(() => {
-                                message.channel.send(':robot:');
-                            });
+                            setPP(path);
 
                             ok = true;
                         });
@@ -61,21 +59,56 @@ module.exports.callback = (bipboup) => {
             return ok;
         };
 
-        if (message.attachments.array().length > 0) {
-            upload();
-        } else if (words.length === 2) {
+        const withFile = (filename, callback) => {
             Fs.readdir(ppdir, (err, files) => {
                 for (let i = 0; i < files.length; ++i) {
-                    if (Path.basename(files[i], Path.extname(files[i])) === words[1]) {
-                        bipboup.user.setAvatar(Path.join(ppdir, files[i])).then(() => {
-                            message.channel.send(':robot:');
-                        }).catch((error) => {
-                            message.reply(':warning: Je ne peux pas changer de PP maintenant !');
-                        });
+                    if (Path.basename(files[i], Path.extname(files[i])) === filename) {
+                        callback(Path.join(ppdir, files[i]));
                         break;
                     }
                 }
             });
+        };
+
+        const listPP = () => {
+            Fs.readdir(ppdir, (err, files) => {
+                message.reply(files.map((file) => Path.basename(file, Path.extname(file))).join(', '));
+            });
+        };
+
+        const rmPP = (f) => {
+            if (f != null)
+                Fs.unlink(f, (e) => message.react(e == null ? '👌' : '👎'));
+            else
+                withFile(words[2], rmPP);
+        };
+
+        const setPP = (f) => {
+            if (f != null)
+                bipboup.user.setAvatar(f).then(() => {
+                    message.channel.send(':robot:');
+                }).catch((error) => {
+                    message.reply(':warning: Je ne peux pas changer de PP maintenant !');
+                });
+            else
+                withFile(words[1], setPP);
+        };
+
+        if (message.attachments.array().length > 0) {
+            upload();
+        } else if (words.length >= 2) {
+            switch (words[1])
+            {
+                case 'list':
+                    listPP();
+                    break;
+                case 'rm':
+                    rmPP();
+                    break;
+                default:
+                    setPP();
+                    break;
+            }
         }
     };
 };
