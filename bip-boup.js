@@ -47,6 +47,7 @@ const startup = () => {
 
     require(Path.join(__dirname, 'on-message.js'))(bipboup);
     require(Path.join(__dirname, 'on-emoji.js'))(bipboup);
+    require(Path.join(__dirname, 'on-member.js'))(bipboup);
 
     // Connect from the token found in the .token file
     Fs.readFile('.token', { encoding : 'utf-8' }, (err, data) => {
