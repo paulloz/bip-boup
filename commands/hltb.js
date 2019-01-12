@@ -2,7 +2,7 @@ let hltb = require('howlongtobeat');
 let hltbService = new hltb.HowLongToBeatService();
 
 module.exports.command = 'hltb'
-module.exports.help = 'HowLongToBeat'
+module.exports.help = 'Pour savoir combien de temps il te faudra pour finir ce jeu'
 module.exports.callback = async (message, words) => {
     if (words.length > 1) {
         const result = await hltbService.search(words.slice(1).join(' '))
