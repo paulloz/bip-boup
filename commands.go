@@ -1,10 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"golang.org/x/net/html"
 )
 
 type Command struct {
@@ -38,6 +43,13 @@ func initCommands() {
 	BotData.Commands["?"] = &Command{IsAliasTo: "help"}
 	BotData.Commands["help"] = &Command{Function: commandHelp, HelpText: "Montre une liste de commande que vous pouvez utiliser."}
 	BotData.Commands["ping"] = &Command{Function: commandPing, HelpText: "Retourne le ping moyen vers Discord."}
+	BotData.Commands["nightcore"] = &Command{
+		Function: commandNightcore,
+		HelpText: "Cherche du nightcore sur YouTube.",
+		Arguments: []CommandArgument{
+			{Name: "recherche", Description: "La recherche à faire sur YouTube", ArgType: "string"},
+		},
+	}
 }
 
 func callCommand(commandName string, args []string, env *CommandEnvironment) *discordgo.MessageEmbed {
@@ -122,4 +134,62 @@ func commandPing(args []string, env *CommandEnvironment) *discordgo.MessageEmbed
 		Title:       "Pong!",
 		Description: fmt.Sprintf("Le ping moyen est de ``%dms``. Un total de ``%d/%d`` paquets ont été perdus.\n", pingAverage, failCount, len(pingResults)),
 	}
+}
+
+func commandNightcore(args []string, env *CommandEnvironment) *discordgo.MessageEmbed {
+	if len(args) < 1 {
+		return nil
+	}
+
+	resp, err := http.Get(fmt.Sprintf("%s&search_query=nightcore+%s", "https://www.youtube.com/results?sp=EgIQAQ%253D%253D", strings.Join(args, "+")))
+	if err != nil {
+		return nil
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil
+	}
+
+	doc, err := html.Parse(bytes.NewReader(body))
+	if err != nil {
+		return nil
+	}
+
+	var f func(*html.Node)
+	done := false
+	var href string = ""
+	var title string = ""
+	f = func(n *html.Node) {
+		if done {
+			return
+		}
+		href = ""
+		title = ""
+		if n.Type == html.ElementNode && n.Data == "a" {
+			for _, a := range n.Attr {
+				if a.Key == "href" && strings.HasPrefix(a.Val, "/watch") {
+					href = a.Val
+				}
+				if a.Key == "title" && strings.Contains(strings.ToLower(a.Val), "nightcore") {
+					title = a.Val
+				}
+				if len(href) > 0 && len(title) > 0 {
+					done = true
+					return
+				}
+			}
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			f(c)
+		}
+	}
+	f(doc)
+
+	if done {
+		BotData.DiscordSession.ChannelMessageSend(env.Channel.ID, fmt.Sprintf("%s - https://www.youtube.com%s", title, href))
+	}
+
+	return nil
 }
