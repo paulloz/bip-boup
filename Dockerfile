@@ -5,6 +5,8 @@ WORKDIR /go/src/github.com/paulloz/bip-boup
 COPY . /go/src/github.com/paulloz/bip-boup
 
 RUN go get github.com/bwmarrin/discordgo
+RUN go get github.com/gojp/kana
+RUN go get github.com/ikawaha/kagome/tokenizer
 RUN go get golang.org/x/net/html
 RUN go build
 
