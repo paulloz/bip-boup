@@ -15,7 +15,7 @@ func handleMessage(session *discordgo.Session, message *discordgo.Message) {
 	isDM := channel.Type == discordgo.ChannelTypeDM || channel.Type == discordgo.ChannelTypeGroupDM
 
 	var member *discordgo.Member = nil
-	guild, err := session.State.Guild(message.GuildID)
+	guild, err := session.State.Guild(channel.GuildID)
 	if err != nil {
 		if !isDM {
 			return

@@ -17,12 +17,14 @@ type Bot struct {
 	Commands       map[string]*Command
 	DiscordSession *discordgo.Session
 
+	BotName       string
 	CommandPrefix string
 	Debug         bool
 }
 
 func discordReady(session *discordgo.Session, event *discordgo.Ready) {
 	BotData.DiscordSession = session
+	BotData.BotName = session.State.User.Username
 
 	Info.Println("Registering commands...")
 	initCommands()

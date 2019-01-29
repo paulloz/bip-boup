@@ -13,10 +13,14 @@ type Command struct {
 	Arguments           []CommandArgument
 	RequiredArguments   []string
 	RequiredPermissions int
+
+	IsAliasTo string
 }
 
 type CommandArgument struct {
-	Value string
+	Name        string
+	ArgType     string
+	Description string
 }
 
 type CommandEnvironment struct {
@@ -31,12 +35,16 @@ type CommandEnvironment struct {
 func initCommands() {
 	BotData.Commands = make(map[string]*Command)
 
+	BotData.Commands["?"] = &Command{IsAliasTo: "help"}
 	BotData.Commands["help"] = &Command{Function: commandHelp, HelpText: "Montre une liste de commande que vous pouvez utiliser."}
 	BotData.Commands["ping"] = &Command{Function: commandPing, HelpText: "Retourne le ping moyen vers Discord."}
 }
 
 func callCommand(commandName string, args []string, env *CommandEnvironment) *discordgo.MessageEmbed {
 	if command, exists := BotData.Commands[commandName]; exists {
+		if len(command.IsAliasTo) > 0 {
+			return callCommand(command.IsAliasTo, args, env)
+		}
 		if len(args) >= len(command.RequiredArguments) {
 			return command.Function(args, env)
 		}
@@ -56,6 +64,10 @@ func commandHelp(args []string, env *CommandEnvironment) *discordgo.MessageEmbed
 	for _, commandName := range commands {
 		command := BotData.Commands[commandName]
 
+		if len(command.IsAliasTo) > 0 {
+			continue
+		}
+
 		if command.RequiredPermissions != 0 {
 			continue
 		}
@@ -68,7 +80,7 @@ func commandHelp(args []string, env *CommandEnvironment) *discordgo.MessageEmbed
 	}
 
 	return &discordgo.MessageEmbed{
-		Title:  "",
+		Title:  "Liste des commandes utilisables",
 		Fields: fields,
 	}
 }
