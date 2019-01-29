@@ -33,7 +33,8 @@ func handleMessage(session *discordgo.Session, message *discordgo.Message) {
 		return
 	}
 
-	var responseEmbed *discordgo.MessageEmbed
+	var responseEmbed *discordgo.MessageEmbed = nil
+	var responseText string = ""
 
 	prefix := ""
 	if strings.HasPrefix(content, BotData.CommandPrefix) {
@@ -46,7 +47,7 @@ func handleMessage(session *discordgo.Session, message *discordgo.Message) {
 		commandContent := strings.TrimPrefix(content, prefix)
 		command := strings.Split(commandContent, " ")
 
-		responseEmbed = callCommand(command[0], command[1:], &CommandEnvironment{
+		responseEmbed, responseText = callCommand(command[0], command[1:], &CommandEnvironment{
 			Guild: guild, Channel: channel,
 			User: message.Author, Member: member,
 			Message: message,
@@ -55,5 +56,9 @@ func handleMessage(session *discordgo.Session, message *discordgo.Message) {
 
 	if responseEmbed != nil {
 		session.ChannelMessageSendEmbed(message.ChannelID, responseEmbed)
+	}
+
+	if len(responseText) > 0 {
+		BotData.DiscordSession.ChannelMessageSend(channel.ID, responseText)
 	}
 }

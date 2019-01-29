@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -15,7 +16,7 @@ import (
 )
 
 type Command struct {
-	Function            func([]string, *CommandEnvironment) *discordgo.MessageEmbed
+	Function            func([]string, *CommandEnvironment) (*discordgo.MessageEmbed, string)
 	HelpText            string
 	Arguments           []CommandArgument
 	RequiredArguments   []string
@@ -62,7 +63,7 @@ func initCommands() {
 	}
 }
 
-func callCommand(commandName string, args []string, env *CommandEnvironment) *discordgo.MessageEmbed {
+func callCommand(commandName string, args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
 	if command, exists := BotData.Commands[commandName]; exists {
 		if len(command.IsAliasTo) > 0 {
 			return callCommand(command.IsAliasTo, args, env)
@@ -72,15 +73,16 @@ func callCommand(commandName string, args []string, env *CommandEnvironment) *di
 		}
 	}
 
-	return nil
+	return nil, ""
 }
 
-func commandHelp(args []string, env *CommandEnvironment) *discordgo.MessageEmbed {
+func commandHelp(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
 	// Get all commands
 	var commands []string
 	for command := range BotData.Commands {
 		commands = append(commands, command)
 	}
+	sort.Strings(commands)
 
 	fields := []*discordgo.MessageEmbedField{}
 	for _, commandName := range commands {
@@ -104,10 +106,10 @@ func commandHelp(args []string, env *CommandEnvironment) *discordgo.MessageEmbed
 	return &discordgo.MessageEmbed{
 		Title:  "Liste des commandes utilisables",
 		Fields: fields,
-	}
+	}, ""
 }
 
-func commandPing(args []string, env *CommandEnvironment) *discordgo.MessageEmbed {
+func commandPing(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
 	pingResults := make([]int, 4)
 
 	// Perform the pings
@@ -140,31 +142,44 @@ func commandPing(args []string, env *CommandEnvironment) *discordgo.MessageEmbed
 	}
 	pingAverage := int(pingSum / len(pingResults))
 
-	return &discordgo.MessageEmbed{
-		Title:       "Pong!",
-		Description: fmt.Sprintf("Le ping moyen est de ``%dms``. Un total de ``%d/%d`` paquets ont été perdus.\n", pingAverage, failCount, len(pingResults)),
+	color := 0x8b0000
+	if pingAverage < 10 {
+		color = 0x90ee90
+	} else if pingAverage < 50 {
+		color = 0xeead00
+	} else if pingAverage < 100 {
+		color = 0xda8600
+	} else if pingAverage < 150 {
+		color = 0xc26001
+	} else if pingAverage < 200 {
+		color = 0xa73902
 	}
+
+	return &discordgo.MessageEmbed{
+		Title: "Pong !", Color: color,
+		Description: fmt.Sprintf("Le ping moyen est de ``%dms``. Un total de ``%d/%d`` paquets ont été perdus.\n", pingAverage, failCount, len(pingResults)),
+	}, ""
 }
 
-func commandNightcore(args []string, env *CommandEnvironment) *discordgo.MessageEmbed {
+func commandNightcore(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
 	if len(args) < 1 {
-		return nil
+		return nil, ""
 	}
 
 	resp, err := http.Get(fmt.Sprintf("%s&search_query=nightcore+%s", "https://www.youtube.com/results?sp=EgIQAQ%253D%253D", strings.Join(args, "+")))
 	if err != nil {
-		return nil
+		return nil, ""
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil
+		return nil, ""
 	}
 
 	doc, err := html.Parse(bytes.NewReader(body))
 	if err != nil {
-		return nil
+		return nil, ""
 	}
 
 	var f func(*html.Node)
@@ -197,17 +212,17 @@ func commandNightcore(args []string, env *CommandEnvironment) *discordgo.Message
 	}
 	f(doc)
 
-	if done {
-		BotData.DiscordSession.ChannelMessageSend(env.Channel.ID, fmt.Sprintf("%s - https://www.youtube.com%s", title, href))
+	if !done {
+		return nil, ""
 	}
 
-	return nil
+	return nil, fmt.Sprintf("%s - https://www.youtube.com%s", title, href)
 }
 
-func commandFurigana(args []string, env *CommandEnvironment) *discordgo.MessageEmbed {
+func commandFurigana(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
 	text := strings.Join(args, " ")
 	if len(text) <= 0 {
-		return nil
+		return nil, ""
 	}
 
 	t := tokenizer.New()
@@ -229,5 +244,5 @@ func commandFurigana(args []string, env *CommandEnvironment) *discordgo.MessageE
 		}
 	}
 
-	return &discordgo.MessageEmbed{Title: text, Description: strings.Join(tokenized, " ")}
+	return &discordgo.MessageEmbed{Title: strings.Join(tokenized, " "), Color: 0xffffff}, ""
 }
