@@ -106,7 +106,6 @@ func main() {
 				}
 			case <-watchdog:
 				if !isBotAlive(botPID) {
-					Info.Println("Spawning a new bot process...")
 					botPID = spawnBot()
 				}
 			}

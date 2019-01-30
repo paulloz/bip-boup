@@ -69,7 +69,7 @@ func initCommands() {
 	Bot.Commands["directan"] = &Command{Function: commandDirectAN, HelpText: "Envoie un lien vers la séance publique en cours à l'Assemblée Nationale."}
 
 	Bot.Commands["député"] = &Command{
-		Function: commandDepute, HelpText: "Montre les informations à propos d'un député disponibles sur nosdeputes.fr.",
+		Function: commandDepute, HelpText: "Montre les informations à propos d'un député disponibles sur NosDéputés.fr.",
 		Arguments: []CommandArgument{
 			{Name: "prénom", Description: "Le prénom du député", ArgType: "string"},
 			{Name: "nom", Description: "Le nom du député", ArgType: "string"},
@@ -84,8 +84,6 @@ func callCommand(commandName string, args []string, env *CommandEnvironment) (*d
 		if len(command.IsAliasTo) > 0 {
 			return callCommand(command.IsAliasTo, args, env)
 		}
-
-		Info.Println(command.IsAdmin, isUserAdmin(env.User))
 
 		if !command.IsAdmin || isUserAdmin(env.User) {
 			if len(args) >= len(command.RequiredArguments) {

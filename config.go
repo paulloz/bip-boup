@@ -21,8 +21,6 @@ type BotConfig struct {
 }
 
 func initConfig(file string) {
-	Info.Println(file)
-
 	fileHandler, err := os.Open(file)
 	defer fileHandler.Close()
 	if err != nil {
