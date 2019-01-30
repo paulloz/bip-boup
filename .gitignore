@@ -1,5 +1,5 @@
 # configuration
-.auth-token
+config.json
 
 # binaries
 bip-boup

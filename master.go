@@ -4,7 +4,6 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
-	"syscall"
 )
 
 func spawnBot() int {
@@ -29,5 +28,10 @@ func isBotAlive(pid int) bool {
 		return false
 	}
 
-	return botProcess.Signal(syscall.Signal(0)) == nil
+	processState, err := botProcess.Wait()
+	if err != nil {
+		return false
+	}
+
+	return processState.Exited()
 }

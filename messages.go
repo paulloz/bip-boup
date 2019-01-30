@@ -37,8 +37,8 @@ func handleMessage(session *discordgo.Session, message *discordgo.Message) {
 	var responseText string = ""
 
 	prefix := ""
-	if strings.HasPrefix(content, BotData.CommandPrefix) {
-		prefix = BotData.CommandPrefix
+	if strings.HasPrefix(content, Bot.CommandPrefix) {
+		prefix = Bot.CommandPrefix
 	}
 
 	if prefix != "" {
@@ -62,6 +62,6 @@ func handleMessage(session *discordgo.Session, message *discordgo.Message) {
 	}
 
 	if len(responseText) > 0 {
-		BotData.DiscordSession.ChannelMessageSend(channel.ID, responseText)
+		Bot.DiscordSession.ChannelMessageSend(channel.ID, responseText)
 	}
 }

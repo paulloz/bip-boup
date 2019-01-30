@@ -2,11 +2,9 @@ package main
 
 import (
 	"flag"
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"strconv"
-	"strings"
 	"syscall"
 	"time"
 
@@ -14,39 +12,29 @@ import (
 )
 
 var (
-	BotData *Bot
+	Bot *BotConfig
 
 	IsThisABot bool
 	MasterPID  int
-	AuthToken  string
 )
 
-type Bot struct {
-	Commands       map[string]*Command
-	DiscordSession *discordgo.Session
-
-	BotName       string
-	CommandPrefix string
-	Debug         bool
-}
-
 func init() {
+	var configFile string
+
 	flag.BoolVar(&IsThisABot, "bot", false, "launch bot without a master process")
 	flag.IntVar(&MasterPID, "masterpid", -1, "this master process' PID")
+	flag.StringVar(&configFile, "config", "config.json", "path to the .json configuration file")
 
 	cliCommand := flag.String("command", "", "perform a command instead of running the bot")
 
-	BotData = &Bot{CommandPrefix: "!", Debug: false}
+	Bot = &BotConfig{CommandPrefix: "!", Debug: false}
 
 	flag.Parse()
 
 	if IsThisABot {
 		initLog("BOT")
 
-		rawData, err := ioutil.ReadFile(".auth-token")
-		if err == nil {
-			AuthToken = strings.TrimRight(string(rawData), "\n")
-		}
+		initConfig(configFile)
 
 		if len(*cliCommand) > 0 {
 			initCommands()
@@ -63,15 +51,15 @@ func main() {
 	Info.Println("Current PID is " + strconv.Itoa(os.Getpid()))
 
 	if IsThisABot {
-		if len(AuthToken) > 0 {
+		if len(Bot.AuthToken) > 0 {
 			Info.Println("Creating a Discord session...")
 
-			discord, err := discordgo.New("Bot " + AuthToken)
+			discord, err := discordgo.New("Bot " + Bot.AuthToken)
 			if err != nil {
 				panic(err)
 			}
 
-			if BotData.Debug {
+			if Bot.Debug {
 				discord.LogLevel = discordgo.LogInformational
 			}
 
@@ -119,7 +107,7 @@ func main() {
 			case <-watchdog:
 				if !isBotAlive(botPID) {
 					Info.Println("Spawning a new bot process...")
-					//botPID = spawnBot()
+					botPID = spawnBot()
 				}
 			}
 		}
@@ -127,8 +115,8 @@ func main() {
 }
 
 func discordReady(session *discordgo.Session, event *discordgo.Ready) {
-	BotData.DiscordSession = session
-	BotData.BotName = session.State.User.Username
+	Bot.DiscordSession = session
+	Bot.BotName = session.State.User.Username
 
 	Info.Println("Registering commands...")
 	initCommands()

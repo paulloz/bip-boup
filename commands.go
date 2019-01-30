@@ -5,11 +5,13 @@ import (
 )
 
 type Command struct {
-	Function            func([]string, *CommandEnvironment) (*discordgo.MessageEmbed, string)
-	HelpText            string
-	Arguments           []CommandArgument
-	RequiredArguments   []string
+	Function          func([]string, *CommandEnvironment) (*discordgo.MessageEmbed, string)
+	HelpText          string
+	Arguments         []CommandArgument
+	RequiredArguments []string
+
 	RequiredPermissions int
+	IsAdmin             bool
 
 	IsAliasTo string
 }
@@ -30,20 +32,25 @@ type CommandEnvironment struct {
 }
 
 func initCommands() {
-	BotData.Commands = make(map[string]*Command)
+	Bot.Commands = make(map[string]*Command)
 
-	BotData.Commands["help"] = &Command{
+	Bot.Commands["restart"] = &Command{
+		Function: commandRestart, IsAdmin: true,
+		HelpText: "Arrête et redémarre le bot.",
+	}
+
+	Bot.Commands["help"] = &Command{
 		Function: commandHelp,
 		HelpText: "Montre une liste de commande que vous pouvez utiliser ou bien l'aide d'une commande spécifique.",
 		Arguments: []CommandArgument{
 			{Name: "commande", Description: "Commande dont on veut afficher l'aide", ArgType: "commande"},
 		},
 	}
-	BotData.Commands["?"] = &Command{IsAliasTo: "help"}
+	Bot.Commands["?"] = &Command{IsAliasTo: "help"}
 
-	BotData.Commands["ping"] = &Command{Function: commandPing, HelpText: "Retourne le ping moyen vers Discord."}
+	Bot.Commands["ping"] = &Command{Function: commandPing, HelpText: "Retourne le ping moyen vers Discord."}
 
-	BotData.Commands["nightcore"] = &Command{
+	Bot.Commands["nightcore"] = &Command{
 		Function: commandNightcore, HelpText: "Cherche du nightcore sur YouTube.",
 		Arguments: []CommandArgument{
 			{Name: "requête", Description: "La recherche à faire sur YouTube", ArgType: "string"},
@@ -51,7 +58,7 @@ func initCommands() {
 		RequiredArguments: []string{"requête"},
 	}
 
-	BotData.Commands["furigana"] = &Command{
+	Bot.Commands["furigana"] = &Command{
 		Function: commandFurigana, HelpText: "Ajoute des furiganas à un texte en Japonais.",
 		Arguments: []CommandArgument{
 			{Name: "texte", Description: "Le texte dans lequel on veut insérer des furiganas", ArgType: "string"},
@@ -59,9 +66,9 @@ func initCommands() {
 		RequiredArguments: []string{"texte"},
 	}
 
-	BotData.Commands["directan"] = &Command{Function: commandDirectAN, HelpText: "Envoie un lien vers la séance publique en cours à l'Assemblée Nationale."}
+	Bot.Commands["directan"] = &Command{Function: commandDirectAN, HelpText: "Envoie un lien vers la séance publique en cours à l'Assemblée Nationale."}
 
-	BotData.Commands["député"] = &Command{
+	Bot.Commands["député"] = &Command{
 		Function: commandDepute, HelpText: "Montre les informations à propos d'un député disponibles sur nosdeputes.fr.",
 		Arguments: []CommandArgument{
 			{Name: "prénom", Description: "Le prénom du député", ArgType: "string"},
@@ -69,19 +76,23 @@ func initCommands() {
 		},
 		RequiredArguments: []string{"nom"},
 	}
-	BotData.Commands["depute"] = &Command{IsAliasTo: "député"}
+	Bot.Commands["depute"] = &Command{IsAliasTo: "député"}
 }
 
 func callCommand(commandName string, args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
-	if command, exists := BotData.Commands[commandName]; exists {
+	if command, exists := Bot.Commands[commandName]; exists {
 		if len(command.IsAliasTo) > 0 {
 			return callCommand(command.IsAliasTo, args, env)
 		}
 
-		if len(args) >= len(command.RequiredArguments) {
-			return command.Function(args, env)
-		} else {
-			return callCommand("help", []string{commandName}, env)
+		Info.Println(command.IsAdmin, isUserAdmin(env.User))
+
+		if !command.IsAdmin || isUserAdmin(env.User) {
+			if len(args) >= len(command.RequiredArguments) {
+				return command.Function(args, env)
+			} else {
+				return callCommand("help", []string{commandName}, env)
+			}
 		}
 	}
 

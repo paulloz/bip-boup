@@ -17,7 +17,7 @@ var (
 
 func initLog(processName string) {
 	Debug = log.New(ioutil.Discard, "["+processName+"] DEBUG: ", logFlags)
-	if BotData.Debug {
+	if Bot.Debug {
 		Debug = log.New(os.Stdout, "["+processName+"] DEBUG: ", logFlags)
 	}
 	Info = log.New(os.Stdout, "["+processName+"] INFO: ", logFlags)
