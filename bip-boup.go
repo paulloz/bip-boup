@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"os"
 	"os/signal"
 	"strconv"
@@ -35,6 +36,15 @@ func discordReady(session *discordgo.Session, event *discordgo.Ready) {
 func init() {
 	BotData = &Bot{CommandPrefix: "!", Debug: false}
 	initLog()
+
+	cliCommand := flag.String("cmd", "", "perform a command instead of running the bot")
+	flag.Parse()
+
+	if len(*cliCommand) > 0 {
+		initCommands()
+		callCommand(*cliCommand, flag.Args(), &CommandEnvironment{})
+		os.Exit(0)
+	}
 }
 
 func main() {

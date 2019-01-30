@@ -55,7 +55,10 @@ func handleMessage(session *discordgo.Session, message *discordgo.Message) {
 	}
 
 	if responseEmbed != nil {
-		session.ChannelMessageSendEmbed(message.ChannelID, responseEmbed)
+		_, err := session.ChannelMessageSendEmbed(message.ChannelID, responseEmbed)
+		if err != nil {
+			Error.Println(err.Error())
+		}
 	}
 
 	if len(responseText) > 0 {

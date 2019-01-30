@@ -56,7 +56,7 @@ func initCommands() {
 		Function: commandFurigana,
 		HelpText: "Ajoute des furiganas à un texte en Japonais.",
 		Arguments: []CommandArgument{
-			{Name: "texte", Description: "Le texte dans lequel on veut les furiganas", ArgType: "string"},
+			{Name: "texte", Description: "Le texte dans lequel on veut les furiganas.", ArgType: "string"},
 		},
 		RequiredArguments: []string{"texte"},
 	}
@@ -169,8 +169,8 @@ func commandNightcore(args []string, env *CommandEnvironment) (*discordgo.Messag
 	if err != nil {
 		return nil, ""
 	}
-
 	defer resp.Body.Close()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, ""
