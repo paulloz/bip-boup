@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -12,7 +11,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/gojp/kana"
 	"github.com/ikawaha/kagome/tokenizer"
-	"golang.org/x/net/html"
+	"github.com/moovweb/gokogiri"
 )
 
 type Command struct {
@@ -177,46 +176,21 @@ func commandNightcore(args []string, env *CommandEnvironment) (*discordgo.Messag
 		return nil, ""
 	}
 
-	doc, err := html.Parse(bytes.NewReader(body))
+	doc, err := gokogiri.ParseHtml(body)
 	if err != nil {
 		return nil, ""
 	}
+	defer doc.Free()
 
-	var f func(*html.Node)
-	done := false
-	var href string = ""
-	var title string = ""
-	f = func(n *html.Node) {
-		if done {
-			return
-		}
-		href = ""
-		title = ""
-		if n.Type == html.ElementNode && n.Data == "a" {
-			for _, a := range n.Attr {
-				if a.Key == "href" && strings.HasPrefix(a.Val, "/watch") {
-					href = a.Val
-				}
-				if a.Key == "title" && strings.Contains(strings.ToLower(a.Val), "nightcore") {
-					title = a.Val
-				}
-				if len(href) > 0 && len(title) > 0 {
-					done = true
-					return
-				}
-			}
-		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			f(c)
+	rootNode := doc.Root()
+	resultsNode, _ := rootNode.Search("//h3/a")
+	for _, node := range resultsNode {
+		if strings.Contains(strings.ToLower(node.Content()), "nightcore") {
+			return nil, fmt.Sprintf("%s - https://www.youtube.com%s", node.Content(), node.Attr("href"))
 		}
 	}
-	f(doc)
 
-	if !done {
-		return nil, ""
-	}
-
-	return nil, fmt.Sprintf("%s - https://www.youtube.com%s", title, href)
+	return nil, ""
 }
 
 func commandFurigana(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
