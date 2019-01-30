@@ -60,7 +60,7 @@ func commandHelp(args []string, env *CommandEnvironment) (*discordgo.MessageEmbe
 
 			usage += " " + argString
 
-			arguments = append(arguments, fmt.Sprintf("- %s (*%s*), %s.", argString, arg.ArgType, strings.ToLower(arg.Description)))
+			arguments = append(arguments, fmt.Sprintf("- %s (*%s*), %s.", argString, arg.ArgType, strings.TrimRight(strings.ToLower(arg.Description), ".")))
 		}
 
 		fields := []*discordgo.MessageEmbedField{
