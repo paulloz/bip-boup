@@ -209,7 +209,7 @@ func commandDepute(args []string, env *CommandEnvironment) (*discordgo.MessageEm
 	ficheAN, _ := rootNode.Search("//url_an")
 	fiche, _ := rootNode.Search("//url_nosdeputes")
 
-	fields = append(fields, embedField("Fiches", fmt.Sprintf("[Assemblée Nationale](%s)\n[NosDéputés.fr](%s)", fiche[0].Content(), ficheAN[0].Content()), true))
+	fields = append(fields, embedField("Fiches", fmt.Sprintf("[Assemblée Nationale](%s)\n[NosDéputés.fr](%s)", ficheAN[0].Content(), fiche[0].Content()), true))
 
 	imageURL := fmt.Sprintf("https://www.nosdeputes.fr/depute/photo/%s/120", slug)
 
