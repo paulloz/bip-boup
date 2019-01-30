@@ -15,12 +15,12 @@ var (
 	Error   *log.Logger
 )
 
-func initLog() {
-	Debug = log.New(ioutil.Discard, "DEBUG: ", logFlags)
+func initLog(processName string) {
+	Debug = log.New(ioutil.Discard, "["+processName+"] DEBUG: ", logFlags)
 	if BotData.Debug {
-		Debug = log.New(os.Stdout, "DEBUG: ", logFlags)
+		Debug = log.New(os.Stdout, "["+processName+"] DEBUG: ", logFlags)
 	}
-	Info = log.New(os.Stdout, "INFO: ", logFlags)
-	Warning = log.New(os.Stdout, "WARNING: ", logFlags)
-	Error = log.New(os.Stdout, "ERROR: ", logFlags)
+	Info = log.New(os.Stdout, "["+processName+"] INFO: ", logFlags)
+	Warning = log.New(os.Stdout, "["+processName+"] WARNING: ", logFlags)
+	Error = log.New(os.Stdout, "["+processName+"] ERROR: ", logFlags)
 }
