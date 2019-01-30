@@ -33,20 +33,27 @@ func initCommands() {
 	BotData.Commands = make(map[string]*Command)
 
 	BotData.Commands["?"] = &Command{IsAliasTo: "help"}
-	BotData.Commands["help"] = &Command{Function: commandHelp, HelpText: "Montre une liste de commande que vous pouvez utiliser."}
+	BotData.Commands["help"] = &Command{
+		Function: commandHelp,
+		HelpText: "Montre une liste de commande que vous pouvez utiliser ou bien l'aide d'une commande spécifique.",
+		Arguments: []CommandArgument{
+			{Name: "commande", Description: "Commande dont on veut afficher l'aide", ArgType: "commande"},
+		},
+	}
 	BotData.Commands["ping"] = &Command{Function: commandPing, HelpText: "Retourne le ping moyen vers Discord."}
 	BotData.Commands["nightcore"] = &Command{
 		Function: commandNightcore,
 		HelpText: "Cherche du nightcore sur YouTube.",
 		Arguments: []CommandArgument{
-			{Name: "recherche", Description: "La recherche à faire sur YouTube", ArgType: "string"},
+			{Name: "requête", Description: "La recherche à faire sur YouTube", ArgType: "string"},
 		},
+		RequiredArguments: []string{"requête"},
 	}
 	BotData.Commands["furigana"] = &Command{
 		Function: commandFurigana,
 		HelpText: "Ajoute des furiganas à un texte en Japonais.",
 		Arguments: []CommandArgument{
-			{Name: "texte", Description: "Le texte dans lequel on veut les furiganas.", ArgType: "string"},
+			{Name: "texte", Description: "Le texte dans lequel on veut insérer des furiganas.", ArgType: "string"},
 		},
 		RequiredArguments: []string{"texte"},
 	}
@@ -57,8 +64,11 @@ func callCommand(commandName string, args []string, env *CommandEnvironment) (*d
 		if len(command.IsAliasTo) > 0 {
 			return callCommand(command.IsAliasTo, args, env)
 		}
+
 		if len(args) >= len(command.RequiredArguments) {
 			return command.Function(args, env)
+		} else {
+			return callCommand("help", []string{commandName}, env)
 		}
 	}
 

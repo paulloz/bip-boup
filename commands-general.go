@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-func commandHelp(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
+func commandGeneralHelp(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
 	// Get all commands
 	var commands []string
 	for command := range BotData.Commands {
@@ -39,6 +40,44 @@ func commandHelp(args []string, env *CommandEnvironment) (*discordgo.MessageEmbe
 		Title:  "Liste des commandes utilisables",
 		Fields: fields,
 	}, ""
+}
+
+func commandHelp(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
+	if len(args) <= 0 {
+		return commandGeneralHelp(args, env)
+	}
+
+	if command, exists := BotData.Commands[args[0]]; exists {
+		usage := fmt.Sprintf("%s%s", BotData.CommandPrefix, args[0])
+		arguments := []string{}
+
+		for _, arg := range command.Arguments {
+			argString := arg.Name
+			if !contains(command.RequiredArguments, arg.Name) {
+				argString = fmt.Sprintf("[%s]", argString)
+				// required = "(obligatoire)"
+			}
+
+			usage += " " + argString
+
+			arguments = append(arguments, fmt.Sprintf("- %s (*%s*), %s.", argString, arg.ArgType, strings.ToLower(arg.Description)))
+		}
+
+		fields := []*discordgo.MessageEmbedField{
+			&discordgo.MessageEmbedField{Name: "Usage", Value: usage, Inline: false},
+		}
+		if len(arguments) > 0 {
+			fields = append(fields, &discordgo.MessageEmbedField{Name: "Arguments", Value: strings.Join(arguments, "\n"), Inline: false})
+		}
+
+		return &discordgo.MessageEmbed{
+			Title:       fmt.Sprintf("Aide de %s%s", BotData.CommandPrefix, args[0]),
+			Description: command.HelpText,
+			Fields:      fields,
+		}, ""
+	}
+
+	return nil, ""
 }
 
 func commandPing(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
