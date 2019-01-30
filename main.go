@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"strconv"
@@ -121,4 +122,13 @@ func discordReady(session *discordgo.Session, event *discordgo.Ready) {
 	initCommands()
 
 	Info.Println("Everything is ready!")
+
+	restartFile := "/tmp/bip-boup.restart"
+	fileData, err := ioutil.ReadFile(restartFile)
+	if err == nil {
+		Bot.DiscordSession.ChannelMessageSend(string(fileData), "Je suis là !")
+		os.Remove(restartFile)
+	} else if !os.IsNotExist(err) {
+		panic(err)
+	}
 }
