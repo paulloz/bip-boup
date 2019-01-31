@@ -137,7 +137,6 @@ func commandDepute(args []string, env *CommandEnvironment) (*discordgo.MessageEm
 
 	resp, err := http.Get(url)
 	if err != nil {
-		Info.Println("DLKSLD")
 		return nil, ""
 	}
 	defer resp.Body.Close()

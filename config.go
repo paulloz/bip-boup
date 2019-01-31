@@ -17,10 +17,13 @@ type BotConfig struct {
 	CommandPrefix string `json:"CommandPrefix"`
 
 	Admins []string `json:"Admins"`
-	Debug  bool     `json:"-"`
+
+	Modified bool `json:"-"`
 }
 
 func initConfig(file string) {
+	Bot = &BotConfig{}
+
 	fileHandler, err := os.Open(file)
 	defer fileHandler.Close()
 	if err != nil {
@@ -31,5 +34,34 @@ func initConfig(file string) {
 	err = decoder.Decode(&Bot)
 	if err != nil {
 		panic(err)
+	}
+
+	checkConfig()
+}
+
+func checkConfig() {
+	if len(Bot.CommandPrefix) <= 0 {
+		Bot.CommandPrefix = "!"
+	}
+
+	Bot.Modified = false
+}
+
+func saveConfig(file string) {
+	if !Bot.Modified {
+		return
+	}
+
+	fileHandler, err := os.OpenFile(file, os.O_WRONLY, os.ModeAppend)
+	defer fileHandler.Close()
+	if err != nil {
+		return
+	}
+
+	encoder := json.NewEncoder(fileHandler)
+	encoder.SetIndent("", "    ")
+	err = encoder.Encode(&Bot)
+	if err != nil {
+		Error.Println(err.Error())
 	}
 }

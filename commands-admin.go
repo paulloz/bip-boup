@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"syscall"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -16,6 +17,10 @@ func commandRestart(args []string, env *CommandEnvironment) (*discordgo.MessageE
 		fileHandler.Close()
 	}
 
-	os.Exit(0) // Exit, the master process will start a new bot
+	process, err := os.FindProcess(os.Getpid())
+	if err != nil {
+		panic(err)
+	}
+	process.Signal(syscall.SIGINT) // Exit, the master process will start a new bot
 	return nil, ""
 }

@@ -15,9 +15,9 @@ var (
 	Error   *log.Logger
 )
 
-func initLog(processName string) {
+func initLog(processName string, isDebug bool) {
 	Debug = log.New(ioutil.Discard, "["+processName+"] DEBUG: ", logFlags)
-	if Bot.Debug {
+	if isDebug {
 		Debug = log.New(os.Stdout, "["+processName+"] DEBUG: ", logFlags)
 	}
 	Info = log.New(os.Stdout, "["+processName+"] INFO: ", logFlags)

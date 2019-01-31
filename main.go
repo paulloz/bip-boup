@@ -17,33 +17,22 @@ var (
 
 	IsThisABot bool
 	MasterPID  int
+	ConfigFile string
+	IsDebug    bool
 )
 
 func init() {
-	var configFile string
-
 	flag.BoolVar(&IsThisABot, "bot", false, "launch bot without a master process")
 	flag.IntVar(&MasterPID, "masterpid", -1, "this master process' PID")
-	flag.StringVar(&configFile, "config", "config.json", "path to the .json configuration file")
-
-	cliCommand := flag.String("command", "", "perform a command instead of running the bot")
-
-	Bot = &BotConfig{CommandPrefix: "!", Debug: false}
-
+	flag.StringVar(&ConfigFile, "config", "config.json", "path to the .json configuration file")
+	flag.BoolVar(&IsDebug, "debug", false, "launch in debug mode")
 	flag.Parse()
 
 	if IsThisABot {
-		initLog("BOT")
-
-		initConfig(configFile)
-
-		if len(*cliCommand) > 0 {
-			initCommands()
-			callCommand(*cliCommand, flag.Args(), &CommandEnvironment{})
-			os.Exit(0)
-		}
+		initLog("BOT", IsDebug)
+		initConfig(ConfigFile)
 	} else {
-		initLog("MASTER")
+		initLog("MASTER", IsDebug)
 	}
 }
 
@@ -60,7 +49,7 @@ func main() {
 				panic(err)
 			}
 
-			if Bot.Debug {
+			if IsDebug {
 				discord.LogLevel = discordgo.LogInformational
 			}
 
@@ -81,6 +70,8 @@ func main() {
 
 			Info.Println("Disconnecting from Discord...")
 			discord.Close()
+
+			saveConfig(ConfigFile)
 		} else {
 			Error.Println("Couldn't find an authentification token, exiting...")
 			os.Exit(1)
