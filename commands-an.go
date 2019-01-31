@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -19,15 +20,31 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
-func commandDirectANNoSession(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
-	url := "http://data.assemblee-nationale.fr/static/openData/repository/15/vp/seances/seances_publique_libre_office.csv"
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, ""
-	}
-	defer resp.Body.Close()
+type Depute struct {
+	D struct {
+		BirthDate        string `json:"date_naissance"`
+		Name             string `json:"nom"`
+		Circo            string `json:"nom_circo"`
+		Profession       string `json:"profession"`
+		Sex              string `json:"sexe"`
+		Twitter          string `json:"twitter"`
+		URLAN            string `json:"url_an"`
+		URLNosDeputes    string `json:"url_nosdeputes"`
+		Responsabilities []struct {
+			R struct {
+				Organism string `json:"organisme"`
+				Function string `json:"function"`
+			} `json:"responsabilite"`
+		} `json:"responsabilites"`
+		Group struct {
+			Organism string `json:"organisme"`
+			Function string `json:"fonction"`
+		} `json:"groupe"`
+	} `json:"depute"`
+}
 
-	body, err := ioutil.ReadAll(resp.Body)
+func commandDirectANNoSession(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
+	body, err := httpGet("http://data.assemblee-nationale.fr/static/openData/repository/15/vp/seances/seances_publique_libre_office.csv")
 	if err != nil {
 		return nil, ""
 	}
@@ -123,88 +140,55 @@ func commandDepute(args []string, env *CommandEnvironment) (*discordgo.MessageEm
 		_s, _, _ := transform.String(t, s)
 		return strings.ToLower(_s)
 	}), "-")
-	url := fmt.Sprintf("https://www.nosdeputes.fr/%s/xml", slug)
+	url := fmt.Sprintf("https://www.nosdeputes.fr/%s/json", slug)
 
-	resp, err := http.Get(url)
+	body, err := httpGet(url)
 	if err != nil {
 		return nil, ""
 	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil || len(body) == 0 {
-		return nil, ""
+	if len(body) == 0 {
+		return commandDeputeSearch(args, env)
 	}
 
-	doc, err := gokogiri.ParseXml(body)
-	if err != nil {
+	var depute Depute
+	if err = json.Unmarshal(body, &depute); err != nil {
 		return nil, ""
 	}
-	defer doc.Free()
-
-	rootNode := doc.Root()
 
 	fields := []*discordgo.MessageEmbedField{}
 
-	name, _ := rootNode.Search("//depute/nom")
-	group, _ := rootNode.Search("//groupe/organisme")
-	groupFunction, _ := rootNode.Search("//groupe/fonction")
-	circo, _ := rootNode.Search("//depute/nom_circo")
-	profession, _ := rootNode.Search("//profession")
-	birthDate, _ := rootNode.Search("//date_naissance")
-
-	sex, _ := rootNode.Search("//depute/sexe")
 	genderE := ""
-	if sex[0].Content() == "F" {
+	if depute.D.Sex == "F" {
 		genderE = "e"
 	}
 
-	respParlNodes, _ := rootNode.Search("//responsabilites/responsabilite")
-	if len(respParlNodes) > 0 {
+	if len(depute.D.Responsabilities) > 0 {
 		respParl := []string{}
-		if groupFunction[0].Content() != "membre" {
-			respParl = append(respParl, fmt.Sprintf("%s, %s.", group[0].Content(), groupFunction[0].Content()))
+		if depute.D.Group.Function != "membre" {
+			respParl = append(respParl, fmt.Sprintf("%s, %s.", depute.D.Group.Organism, depute.D.Group.Function))
 		}
-		for _, respParlNode := range respParlNodes {
-			org, _ := respParlNode.Search("organisme")
-			function, _ := respParlNode.Search("fonction")
-			respParl = append(respParl, fmt.Sprintf("%s, %s.", org[0].Content(), function[0].Content()))
+		for _, responsability := range depute.D.Responsabilities {
+			respParl = append(respParl, fmt.Sprintf("%s, %s.", responsability.R.Organism, responsability.R.Function))
 		}
 		fields = append(fields, embedField("Responsabilités parlementaires", strings.Join(respParl, "\n")))
 	}
 
-	// groupParlNodes, _ := rootNode.Search("//groupes_parlementaires/responsabilite")
-	// if len(groupParlNodes) > 0 {
-	// 	groupParl := []string{}
-	// 	for _, groupParlNode := range groupParlNodes {
-	// 		org, _ := groupParlNode.Search("organisme")
-	// 		function, _ := groupParlNode.Search("fonction")
-	// 		groupParl = append(groupParl, fmt.Sprintf("%s, %s.", org[0].Content(), function[0].Content()))
-	// 	}
-	// 	fields = append(fields, embedField("Groupes parlementaires", strings.Join(groupParl, "\n")))
-	// }
-
-	parsedBirthDate, _ := time.Parse("2006-01-02", birthDate[0].Content())
+	parsedBirthDate, _ := time.Parse("2006-01-02", depute.D.BirthDate)
 	age := int(time.Since(parsedBirthDate).Hours() / 24 / 365)
 	fields = append(fields, embedField("Âge", fmt.Sprintf("%d ans", age), true))
-	fields = append(fields, embedField("Profession", profession[0].Content(), true))
+	fields = append(fields, embedField("Profession", depute.D.Profession, true))
 
-	twitter, _ := rootNode.Search("//twitter")
-	if len(twitter) > 0 {
-		handle := twitter[0].Content()
-		fields = append(fields, embedField("Twitter", fmt.Sprintf("[@%s](https://twitter.com/%s)", handle, handle), true))
+	if len(depute.D.Twitter) > 0 {
+		fields = append(fields, embedField("Twitter", fmt.Sprintf("[@%s](https://twitter.com/%s)", depute.D.Twitter, depute.D.Twitter), true))
 	}
 
-	ficheAN, _ := rootNode.Search("//url_an")
-	fiche, _ := rootNode.Search("//url_nosdeputes")
-
-	fields = append(fields, embedField("Fiches", fmt.Sprintf("[Assemblée Nationale](%s)\n[NosDéputés.fr](%s)", ficheAN[0].Content(), fiche[0].Content()), true))
+	fields = append(fields, embedField("Fiches", fmt.Sprintf("[Assemblée Nationale](%s)\n[NosDéputés.fr](%s)", depute.D.URLAN, depute.D.URLNosDeputes), true))
 
 	imageURL := fmt.Sprintf("https://www.nosdeputes.fr/depute/photo/%s/120", slug)
 
 	return &discordgo.MessageEmbed{
-		Title:       name[0].Content(),
-		Description: fmt.Sprintf("Député%s %s (%s).", genderE, group[0].Content(), circo[0].Content()),
+		Title:       depute.D.Name,
+		Description: fmt.Sprintf("Député%s %s (%s).", genderE, depute.D.Group.Organism, depute.D.Circo),
 		Image:       &discordgo.MessageEmbedImage{URL: imageURL},
 		Fields:      fields,
 		Footer: &discordgo.MessageEmbedFooter{
