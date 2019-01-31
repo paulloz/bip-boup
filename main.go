@@ -72,6 +72,7 @@ func main() {
 			discord.Close()
 
 			saveConfig(ConfigFile)
+			clearCache()
 		} else {
 			Error.Println("Couldn't find an authentification token, exiting...")
 			os.Exit(1)

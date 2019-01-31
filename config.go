@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 
 	"github.com/bwmarrin/discordgo"
@@ -18,7 +19,8 @@ type BotConfig struct {
 
 	Admins []string `json:"Admins"`
 
-	Modified bool `json:"-"`
+	CacheDir string `json:"-"`
+	Modified bool   `json:"-"`
 }
 
 func initConfig(file string) {
@@ -44,6 +46,8 @@ func checkConfig() {
 		Bot.CommandPrefix = "!"
 	}
 
+	Bot.CacheDir = "/tmp/bip-boup"
+	os.Mkdir(Bot.CacheDir, os.ModeDir|0700)
 	Bot.Modified = false
 }
 
@@ -52,7 +56,7 @@ func saveConfig(file string) {
 		return
 	}
 
-	fileHandler, err := os.OpenFile(file, os.O_WRONLY, os.ModeAppend)
+	fileHandler, err := os.OpenFile(file, os.O_WRONLY, 0644)
 	defer fileHandler.Close()
 	if err != nil {
 		return
@@ -64,4 +68,48 @@ func saveConfig(file string) {
 	if err != nil {
 		Error.Println(err.Error())
 	}
+}
+
+type Cache struct {
+	LastModified string
+	Values       *map[string]string
+}
+
+func getCacheFileName(name string) string {
+	return fmt.Sprintf("%s/%s.cached", Bot.CacheDir, name)
+}
+
+func getCache(name string) (cache *Cache) {
+	fileHandler, err := os.Open(getCacheFileName(name))
+	if err != nil {
+		return
+	}
+	defer fileHandler.Close()
+
+	decoder := json.NewDecoder(fileHandler)
+	err = decoder.Decode(&cache)
+	if err != nil {
+		cache = nil
+	}
+
+	return
+}
+
+func setCache(name string, lastModified string, values *map[string]string) {
+	fileHandler, err := os.OpenFile(getCacheFileName(name), os.O_CREATE|os.O_WRONLY, 0644)
+	defer fileHandler.Close()
+	if err != nil {
+		Error.Println(err.Error())
+		return
+	}
+
+	encoder := json.NewEncoder(fileHandler)
+	err = encoder.Encode(&Cache{LastModified: lastModified, Values: values})
+	if err != nil {
+		Error.Println(err.Error())
+	}
+}
+
+func clearCache() {
+	os.RemoveAll(Bot.CacheDir)
 }
