@@ -27,6 +27,7 @@ type Depute struct {
 		Circo            string `json:"nom_circo"`
 		Profession       string `json:"profession"`
 		Sex              string `json:"sexe"`
+		Slug             string `json:"slug"`
 		Twitter          string `json:"twitter"`
 		URLAN            string `json:"url_an"`
 		URLNosDeputes    string `json:"url_nosdeputes"`
@@ -259,7 +260,7 @@ func commandDepute(args []string, env *CommandEnvironment) (*discordgo.MessageEm
 
 	fields = append(fields, embedField("Fiches", fmt.Sprintf("[Assemblée Nationale](%s)\n[NosDéputés.fr](%s)", depute.D.URLAN, depute.D.URLNosDeputes), true))
 
-	imageURL := fmt.Sprintf("https://www.nosdeputes.fr/depute/photo/%s/120", slug)
+	imageURL := fmt.Sprintf("https://www.nosdeputes.fr/depute/photo/%s/120", depute.D.Slug)
 
 	return &discordgo.MessageEmbed{
 		Title:       depute.D.Name,
