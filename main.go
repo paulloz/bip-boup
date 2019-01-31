@@ -31,6 +31,7 @@ func init() {
 	if IsThisABot {
 		initLog("BOT", IsDebug)
 		initConfig(ConfigFile)
+		initCache()
 	} else {
 		initLog("MASTER", IsDebug)
 	}
