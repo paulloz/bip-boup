@@ -87,18 +87,8 @@ func commandDirectANNoSession(args []string, env *CommandEnvironment) (*discordg
 
 func commandDirectAN(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
 	url := "http://videos.assemblee-nationale.fr/direct.1"
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, ""
-	}
-	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, ""
-	}
-
-	doc, err := gokogiri.ParseHtml(body)
+	doc, err := httpGetAsHtml(url)
 	if err != nil {
 		return nil, ""
 	}

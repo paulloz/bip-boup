@@ -1,9 +1,14 @@
 package main
 
 import (
+	"io/ioutil"
+	"net/http"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/moovweb/gokogiri"
+	"github.com/moovweb/gokogiri/html"
+	"github.com/moovweb/gokogiri/xml"
 )
 
 func choose(ss []string, test func(string) bool) (ret []string) {
@@ -49,4 +54,32 @@ func embedField(name string, value string, inline_opt ...bool) *discordgo.Messag
 	}
 
 	return &discordgo.MessageEmbedField{Name: name, Value: value, Inline: inline}
+}
+
+func httpGet(url string) ([]byte, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	return ioutil.ReadAll(resp.Body)
+}
+
+func httpGetAsXml(url string) (*xml.XmlDocument, error) {
+	body, err := httpGet(url)
+	if err != nil {
+		return nil, err
+	}
+
+	return gokogiri.ParseXml(body)
+}
+
+func httpGetAsHtml(url string) (*html.HtmlDocument, error) {
+	body, err := httpGet(url)
+	if err != nil {
+		return nil, err
+	}
+
+	return gokogiri.ParseHtml(body)
 }
