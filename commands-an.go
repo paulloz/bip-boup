@@ -130,6 +130,81 @@ func commandDirectAN(args []string, env *CommandEnvironment) (*discordgo.Message
 	return commandDirectANNoSession(args, env)
 }
 
+func buildDeputeCache(name string, opt ...string) {
+	client := &http.Client{}
+
+	req, err := http.NewRequest("GET", "https://www.nosdeputes.fr/deputes/enmandat/xml", nil)
+	if err != nil {
+		return
+	}
+
+	if len(opt) > 0 {
+		req.Header.Add("If-Modified-Since", opt[0])
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil || len(body) == 0 {
+		return
+	}
+
+	doc, err := gokogiri.ParseXml(body)
+	if err != nil {
+		return
+	}
+	defer doc.Free()
+
+	values := map[string]string{}
+
+	nodes, _ := doc.Root().Search("//depute")
+	for _, node := range nodes {
+		slug, _ := node.Search("slug")
+		name, _ := node.Search("nom")
+
+		values[slug[0].Content()] = strings.ToLower(name[0].Content())
+	}
+
+	setCache(name, resp.Header["Date"][0], &values)
+}
+
+func commandDeputeSearch(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
+	cacheName := "deputes"
+	var cache *Cache
+
+	if cache = getCache(cacheName); cache == nil {
+		buildDeputeCache(cacheName)
+	} else {
+		// Last-Modified is not working right now
+		// buildDeputeCache(cacheName, cache.LastModified)
+	}
+	if cache = getCache(cacheName); cache == nil {
+		return nil, ""
+	}
+
+	search := strings.Join(args, " ")
+	results := []string{}
+
+	for slug, name := range *cache.Values {
+		if strings.Contains(name, search) {
+			results = append(results, slug)
+		}
+	}
+
+	if len(results) == 1 {
+		return commandDepute([]string{results[0]}, env)
+	} else if len(results) > 1 {
+		for _, slug := range results {
+			env.Message.Content = fmt.Sprintf("%sdepute %s", Bot.CommandPrefix, slug)
+			handleMessage(Bot.DiscordSession, env.Message)
+		}
+	}
+	return nil, ""
+}
+
 func commandDepute(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
 	isMn := func(r rune) bool {
 		return unicode.Is(unicode.Mn, r)
