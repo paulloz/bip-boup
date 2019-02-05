@@ -84,6 +84,14 @@ func initCommands() {
 		RequiredArguments: []string{"nom"},
 	}
 	Bot.Commands["depute"] = &Command{IsAliasTo: "député"}
+
+	Bot.Commands["hltb"] = &Command{
+		Function: commandHLTB, HelpText: "Te donne le temps moyen pour finir un jeu.",
+		Arguments: []CommandArgument{
+			{Name: "nom du jeu", Description: "La recherche à faire sur howlongtobeat", ArgType: "string"},
+		},
+		RequiredArguments: []string{"nom du jeu"},
+	}
 }
 
 func callCommand(commandName string, args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
