@@ -83,3 +83,29 @@ func httpGetAsHTML(url string) (*html.HtmlDocument, error) {
 
 	return gokogiri.ParseHtml(body)
 }
+
+func httpPost(url string, params string) ([]byte, error) {
+	body := strings.NewReader(params)
+	req, err := http.NewRequest("POST", url, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	return ioutil.ReadAll(resp.Body)
+}
+
+func httpPostAsHtml(url string, params string) (*html.HtmlDocument, error) {
+	body, err := httpPost(url, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return gokogiri.ParseHtml(body)
+}
