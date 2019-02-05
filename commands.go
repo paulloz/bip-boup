@@ -38,6 +38,10 @@ func initCommands() {
 		Function: commandRestart, IsAdmin: true,
 		HelpText: "Arrête et redémarre le bot.",
 	}
+	Bot.Commands["update"] = &Command{
+		Function: commandUpdate, IsAdmin: true,
+		HelpText: "Met à jour et redémarre le bot.",
+	}
 
 	Bot.Commands["help"] = &Command{
 		Function: commandHelp,

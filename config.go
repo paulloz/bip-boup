@@ -20,6 +20,8 @@ type BotConfig struct {
 
 	CacheDir string `json:"-"`
 	Modified bool   `json:"-"`
+
+	RepoURL string `json:"-"`
 }
 
 func initConfig(file string) {
@@ -44,6 +46,8 @@ func checkConfig() {
 	if len(Bot.CommandPrefix) <= 0 {
 		Bot.CommandPrefix = "!"
 	}
+
+	Bot.RepoURL = "https://github.com/paulloz/bip-boup.git"
 
 	Bot.Modified = false
 }

@@ -2,10 +2,12 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -19,12 +21,17 @@ var (
 	MasterPID  int
 	ConfigFile string
 	IsDebug    bool
+
+	KillOldPID int
+
+	GitCommit string
 )
 
 func init() {
 	flag.BoolVar(&IsThisABot, "bot", false, "launch bot without a master process")
 	flag.IntVar(&MasterPID, "masterpid", -1, "this master process' PID")
 	flag.StringVar(&ConfigFile, "config", "config.json", "path to the .json configuration file")
+	flag.IntVar(&KillOldPID, "killoldpid", -1, "the PID of the old process to kill")
 	flag.BoolVar(&IsDebug, "debug", false, "launch in debug mode")
 	flag.Parse()
 
@@ -80,6 +87,7 @@ func main() {
 		}
 	} else {
 		botPID := spawnBot()
+		KillOldPID = -1
 
 		Info.Println("Waiting for SIGINT syscall signal to terminate...")
 
@@ -124,4 +132,28 @@ func discordReady(session *discordgo.Session, event *discordgo.Ready) {
 	} else if !os.IsNotExist(err) {
 		panic(err)
 	}
+
+	updateFile := "/tmp/bip-boup.update"
+	fileData, err = ioutil.ReadFile(updateFile)
+	if err == nil {
+		lines := strings.Split(string(fileData), "\n")
+		if len(lines) >= 2 {
+			Bot.DiscordSession.ChannelMessageDelete(lines[0], lines[1])
+			Bot.DiscordSession.ChannelMessageSendEmbed(lines[0], &discordgo.MessageEmbed{
+				Title: "Mise à jour", Color: 0x90ee90,
+				Description: fmt.Sprintf("Mise à jour vers ``%s`` terminée.", GitCommit),
+			})
+		}
+		os.Remove(updateFile)
+	} else if !os.IsNotExist(err) {
+		panic(err)
+	}
+
+	if KillOldPID > 0 {
+		oldProcess, err := os.FindProcess(KillOldPID)
+		if err == nil {
+			oldProcess.Signal(syscall.SIGINT)
+		}
+	}
+	os.Remove(os.Args[0] + ".old")
 }
