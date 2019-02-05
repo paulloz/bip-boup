@@ -146,7 +146,7 @@ func discordReady(session *discordgo.Session, event *discordgo.Ready) {
 				os.RemoveAll(lines[2])
 			}
 		}
-		// os.Remove(updateFile)
+		os.Remove(updateFile)
 	} else if !os.IsNotExist(err) {
 		panic(err)
 	}
