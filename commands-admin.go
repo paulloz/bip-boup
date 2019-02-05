@@ -77,27 +77,17 @@ func commandUpdate(args []string, env *CommandEnvironment) (*discordgo.MessageEm
 	os.Rename(os.Args[0], os.Args[0]+".old")
 	os.Rename(outputFile, os.Args[0])
 
-	processToKillPID := os.Getpid()
-	if MasterPID > 0 {
-		processToKillPID = MasterPID
+	fileHandler, err := os.Create("/tmp/bip-boup.update")
+	if err == nil {
+		fileHandler.Write([]byte(env.Channel.ID + "\n" + updateEmbed.ID + "\n" + Bot.CacheDir))
+		fileHandler.Close()
 	}
-	newProcess := exec.Command(os.Args[0], "-killoldpid", fmt.Sprintf("%d", processToKillPID))
-	if MasterPID < 0 {
-		newProcess.Args = append(newProcess.Args, "-bot")
-	}
-	newProcess.Stdout = os.Stdout
-	newProcess.Stderr = os.Stderr
-	err = newProcess.Start()
+
+	process, err := os.FindProcess(os.Getpid())
 	if err != nil {
 		panic(err)
 	}
-	newProcess.Process.Release()
-
-	fileHandler, err := os.Create("/tmp/bip-boup.update")
-	if err == nil {
-		fileHandler.Write([]byte(env.Channel.ID + "\n" + updateEmbed.ID))
-		fileHandler.Close()
-	}
+	process.Signal(syscall.SIGINT) // Exit, the master process will start a new bot
 
 	return nil, ""
 }
