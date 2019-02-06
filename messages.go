@@ -14,7 +14,7 @@ func handleMessage(session *discordgo.Session, message *discordgo.Message) {
 
 	isDM := channel.Type == discordgo.ChannelTypeDM || channel.Type == discordgo.ChannelTypeGroupDM
 
-	var member *discordgo.Member = nil
+	var member *discordgo.Member
 	guild, err := session.State.Guild(channel.GuildID)
 	if err != nil {
 		if !isDM {
@@ -33,8 +33,8 @@ func handleMessage(session *discordgo.Session, message *discordgo.Message) {
 		return
 	}
 
-	var responseEmbed *discordgo.MessageEmbed = nil
-	var responseText string = ""
+	var responseEmbed *discordgo.MessageEmbed
+	var responseText string
 
 	prefix := ""
 	if strings.HasPrefix(content, Bot.CommandPrefix) {

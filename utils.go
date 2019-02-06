@@ -47,10 +47,10 @@ func capitalize(s string) string {
 	return strings.ToUpper(string(s[0])) + string(s[1:])
 }
 
-func embedField(name string, value string, inline_opt ...bool) *discordgo.MessageEmbedField {
+func embedField(name string, value string, inlineOpt ...bool) *discordgo.MessageEmbedField {
 	inline := false
-	if len(inline_opt) > 0 {
-		inline = inline_opt[0]
+	if len(inlineOpt) > 0 {
+		inline = inlineOpt[0]
 	}
 
 	return &discordgo.MessageEmbedField{Name: name, Value: value, Inline: inline}
@@ -66,7 +66,7 @@ func httpGet(url string) ([]byte, error) {
 	return ioutil.ReadAll(resp.Body)
 }
 
-func httpGetAsXml(url string) (*xml.XmlDocument, error) {
+func httpGetAsXML(url string) (*xml.XmlDocument, error) {
 	body, err := httpGet(url)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func httpGetAsXml(url string) (*xml.XmlDocument, error) {
 	return gokogiri.ParseXml(body)
 }
 
-func httpGetAsHtml(url string) (*html.HtmlDocument, error) {
+func httpGetAsHTML(url string) (*html.HtmlDocument, error) {
 	body, err := httpGet(url)
 	if err != nil {
 		return nil, err

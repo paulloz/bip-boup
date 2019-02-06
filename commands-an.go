@@ -20,6 +20,7 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
+// Depute ...
 type Depute struct {
 	D struct {
 		BirthDate        string `json:"date_naissance"`
@@ -106,7 +107,7 @@ func commandDirectANNoSession(args []string, env *CommandEnvironment) (*discordg
 func commandDirectAN(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
 	url := "http://videos.assemblee-nationale.fr/direct.1"
 
-	doc, err := httpGetAsHtml(url)
+	doc, err := httpGetAsHTML(url)
 	if err != nil {
 		return nil, ""
 	}

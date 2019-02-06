@@ -14,6 +14,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// Globals
 var (
 	Bot *BotConfig
 

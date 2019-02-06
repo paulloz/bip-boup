@@ -4,6 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// Command ...
 type Command struct {
 	Function          func([]string, *CommandEnvironment) (*discordgo.MessageEmbed, string)
 	HelpText          string
@@ -16,12 +17,14 @@ type Command struct {
 	IsAliasTo string
 }
 
+// CommandArgument ...
 type CommandArgument struct {
 	Name        string
 	ArgType     string
 	Description string
 }
 
+// CommandEnvironment ...
 type CommandEnvironment struct {
 	Guild   *discordgo.Guild
 	Channel *discordgo.Channel
@@ -92,9 +95,8 @@ func callCommand(commandName string, args []string, env *CommandEnvironment) (*d
 		if !command.IsAdmin || isUserAdmin(env.User) {
 			if len(args) >= len(command.RequiredArguments) {
 				return command.Function(args, env)
-			} else {
-				return callCommand("help", []string{commandName}, env)
 			}
+			return callCommand("help", []string{commandName}, env)
 		}
 	}
 

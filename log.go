@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// Loggers
 var (
 	logFlags = log.Ldate | log.Ltime | log.Lshortfile
 

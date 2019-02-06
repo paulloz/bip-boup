@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+// Cache ...
 type Cache struct {
 	LastModified string
 	Values       *map[string]string

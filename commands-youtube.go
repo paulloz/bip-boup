@@ -8,7 +8,7 @@ import (
 )
 
 func commandNightcore(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
-	doc, err := httpGetAsHtml(fmt.Sprintf("%s&search_query=nightcore+%s", "https://www.youtube.com/results?sp=EgIQAQ%253D%253D", strings.Join(args, "+")))
+	doc, err := httpGetAsHTML(fmt.Sprintf("%s&search_query=nightcore+%s", "https://www.youtube.com/results?sp=EgIQAQ%253D%253D", strings.Join(args, "+")))
 	if err != nil {
 		return nil, ""
 	}

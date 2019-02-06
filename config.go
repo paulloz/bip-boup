@@ -7,6 +7,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// BotConfig ...
 type BotConfig struct {
 	Commands       map[string]*Command `json:"-"`
 	DiscordSession *discordgo.Session  `json:"-"`
