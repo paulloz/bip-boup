@@ -101,7 +101,7 @@ func httpPost(url string, params string) ([]byte, error) {
 	return ioutil.ReadAll(resp.Body)
 }
 
-func httpPostAsHtml(url string, params string) (*html.HtmlDocument, error) {
+func httpPostAsHTML(url string, params string) (*html.HtmlDocument, error) {
 	body, err := httpPost(url, params)
 	if err != nil {
 		return nil, err

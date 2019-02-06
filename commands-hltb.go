@@ -12,7 +12,7 @@ func commandHLTB(args []string, env *CommandEnvironment) (*discordgo.MessageEmbe
 	url := "https://howlongtobeat.com/search_results.php?page=1"
 	params := fmt.Sprintf("queryString=%s&t=games&sorthead=popular&sortd=Normal Order&plat=&length_type=main&length_min=&length_max=&detail=", strings.Join(args, " "))
 
-	doc, err := httpPostAsHtml(url, params)
+	doc, err := httpPostAsHTML(url, params)
 	if err != nil {
 		return nil, ""
 	}
