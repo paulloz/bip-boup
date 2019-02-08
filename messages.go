@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -30,6 +31,11 @@ func handleMessage(session *discordgo.Session, message *discordgo.Message) {
 
 	content := message.Content
 	if len(content) <= 0 {
+		return
+	}
+
+	if strings.Contains(strings.ToLower(content), "array") {
+		session.ChannelMessageSend(channel.ID, fmt.Sprintf("%s array du cul", message.Author.Mention()))
 		return
 	}
 
