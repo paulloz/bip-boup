@@ -93,7 +93,14 @@ func initCommands() {
 		RequiredArguments: []string{"nom du jeu"},
 	}
 
-	Bot.Commands["rappel"] = &Command{Function: commandReminder, HelpText: ""}
+	Bot.Commands["rappel"] = &Command{
+		Function: commandReminder,
+		HelpText: "Enverra un message de rappel à l'heure indiquée",
+		Arguments: []CommandArgument{
+			{Name: "requête", Description: "Une requête en langage naturel qui sera plus ou moins bien interprétée", ArgType: "string"},
+		},
+		RequiredArguments: []string{"requête"},
+	}
 }
 
 func callCommand(commandName string, args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
