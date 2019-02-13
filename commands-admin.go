@@ -9,6 +9,8 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"gopkg.in/src-d/go-git.v4"
+
+	"github.com/paulloz/bip-boup/queue"
 )
 
 func commandRestart(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
@@ -99,4 +101,18 @@ func commandUpdate(args []string, env *CommandEnvironment) (*discordgo.MessageEm
 	process.Signal(syscall.SIGINT) // Exit, the master process will start a new bot
 
 	return nil, ""
+}
+
+func commandQueue(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
+	n := queue.GetQueueLength()
+	s := func() string {
+		if n == 1 {
+			return ""
+		}
+		return "s"
+	}()
+	return &discordgo.MessageEmbed{
+		Title:       "Queue",
+		Description: fmt.Sprintf("Il y a actuellement %d message%s dans la queue.", n, s),
+	}, ""
 }

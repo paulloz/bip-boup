@@ -104,3 +104,7 @@ func GoThroughQueue(send func(string, *discordgo.MessageEmbed) (*discordgo.Messa
 
 	writeQueueFile(&newItems)
 }
+
+func GetQueueLength() int {
+	return len(loadQueueFile())
+}

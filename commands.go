@@ -45,6 +45,10 @@ func initCommands() {
 		Function: commandUpdate, IsAdmin: true,
 		HelpText: "Met à jour et redémarre le bot.",
 	}
+	Bot.Commands["queue"] = &Command{
+		Function: commandQueue, IsAdmin: true,
+		HelpText: "Renvoie le contenu de la queue.",
+	}
 
 	Bot.Commands["help"] = &Command{
 		Function: commandHelp,
