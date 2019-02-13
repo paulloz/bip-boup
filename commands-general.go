@@ -17,6 +17,11 @@ func commandGeneralHelp(args []string, env *CommandEnvironment) (*discordgo.Mess
 	}
 	sort.Strings(commands)
 
+	length := 0
+	n := 1
+
+	embedTitle := "Liste des commandes utilisables"
+
 	fields := []*discordgo.MessageEmbedField{}
 	for _, commandName := range commands {
 		command := Bot.Commands[commandName]
@@ -33,15 +38,34 @@ func commandGeneralHelp(args []string, env *CommandEnvironment) (*discordgo.Mess
 			continue
 		}
 
-		fields = append(fields, &discordgo.MessageEmbedField{
+		newField := &discordgo.MessageEmbedField{
 			Name:   Bot.CommandPrefix + commandName,
 			Value:  command.HelpText,
 			Inline: true,
-		})
+		}
+
+		length += len(newField.Name) + len(newField.Value)
+
+		if length >= 6000 {
+			Bot.DiscordSession.ChannelMessageSendEmbed(env.Channel.ID, &discordgo.MessageEmbed{
+				Title:  fmt.Sprintf("%s (%d)", embedTitle, n),
+				Fields: fields,
+			})
+			fields = []*discordgo.MessageEmbedField{}
+
+			length = len(newField.Name) + len(newField.Value)
+			n++
+		}
+
+		fields = append(fields, newField)
+	}
+
+	if n > 1 {
+		embedTitle = fmt.Sprintf("%s (%d)", embedTitle, n)
 	}
 
 	return &discordgo.MessageEmbed{
-		Title:  "Liste des commandes utilisables",
+		Title:  embedTitle,
 		Fields: fields,
 	}, ""
 }
