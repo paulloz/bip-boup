@@ -65,6 +65,15 @@ func commandUpdate(args []string, env *CommandEnvironment) (*discordgo.MessageEm
 		return &discordgo.MessageEmbed{Title: "Mise à jour", Color: 0x90ee90, Description: "Aucune mise à jour nécessaire."}, ""
 	}
 
+	getCommand := exec.Command("go", "get")
+	getCommand.Dir = tmpDir
+	output, err = getCommand.CombinedOutput()
+	if err != nil {
+		Bot.DiscordSession.ChannelMessageDelete(env.Channel.ID, updateEmbed.ID)
+		errorEmbed.Description = fmt.Sprintf("Impossible d'exécuter ``go get``.\n%s", err.Error())
+		return errorEmbed, ""
+	}
+
 	outputFile := fmt.Sprintf("%s/%s", tmpDir, os.Args[0])
 	buildCommand := exec.Command("go", "build", "-ldflags", "-X main.GitCommit="+hash, "-o", outputFile)
 	buildCommand.Dir = tmpDir
