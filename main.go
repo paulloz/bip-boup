@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+
+	"github.com/paulloz/bip-boup/queue"
 )
 
 // Globals
@@ -70,9 +72,19 @@ func main() {
 			}
 
 			Info.Println("Waiting for SIGINT syscall signal to terminate...")
-			sc := make(chan os.Signal, 1)
-			signal.Notify(sc, syscall.SIGINT)
-			<-sc
+			func() {
+				sc := make(chan os.Signal, 1)
+				signal.Notify(sc, syscall.SIGINT)
+				ticker := time.NewTicker(time.Second * 30).C
+				for {
+					select {
+					case <-sc:
+						return
+					case <-ticker:
+						queue.GoThroughQueue(Bot.DiscordSession.ChannelMessageSendEmbed)
+					}
+				}
+			}()
 
 			Info.Println("Disconnecting from Discord...")
 			discord.Close()
