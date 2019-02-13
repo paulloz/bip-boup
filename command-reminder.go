@@ -33,6 +33,10 @@ func commandReminder(args []string, env *CommandEnvironment) (*discordgo.Message
 		}
 	}
 
+	if longest[1] <= 0 {
+		return nil, ""
+	}
+
 	queue.Queue(env.Channel.ID, split[longest[0]], r.Time)
 
 	return nil, "ok :ok_hand:"
