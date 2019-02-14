@@ -22,7 +22,7 @@ func commandHLTB(args []string, env *CommandEnvironment) (*discordgo.MessageEmbe
 	images, _ := doc.Root().Search(imageResult)
 	titlesResult := xpath.Compile("//div[@class='search_list_details']/h3")
 	titles, _ := doc.Root().Search(titlesResult)
-	gameResult := xpath.Compile("//div[@class='search_list_details_block']/div")
+	gameResult := xpath.Compile("//div[@class='search_list_details_block']")
 	games, _ := doc.Root().Search(gameResult)
 
 	var image string
@@ -43,17 +43,27 @@ func commandHLTB(args []string, env *CommandEnvironment) (*discordgo.MessageEmbe
 
 	var content []string
 	for _, game := range games {
-		tmp := strings.Split(game.Content(), "\n")
-		content = tmp[1:7]
+		content = parseGameResult(strings.Split(game.Content(), "\n"))
 		break
 	}
 
 	return formatResult(title, image, content, args)
 }
 
+func parseGameResult(gameResult []string) []string {
+	var res []string
+	for _, info := range gameResult {
+		if info == " " {
+			continue
+		}
+		res = append(res, strings.Split(info, "  ")...)
+	}
+	return res
+}
+
 func formatResult(title string, imageURL string, content []string, args []string) (*discordgo.MessageEmbed, string) {
 	fields := []*discordgo.MessageEmbedField{}
-	for i := 0; i < len(content); i += 2 {
+	for i := 0; i < len(content)-1; i += 2 {
 		fields = append(fields, embedField(content[i], formatTime(content[i+1]), true))
 	}
 
