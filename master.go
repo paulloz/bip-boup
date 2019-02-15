@@ -11,6 +11,10 @@ func spawnBot() int {
 
 	bot := exec.Command(os.Args[0], "-bot", "-masterpid", strconv.Itoa(os.Getpid()))
 
+	if len(InstanceId) > 0 {
+		bot.Args = append(bot.Args, []string{"-id", InstanceId}...)
+	}
+
 	bot.Stdout = os.Stdout
 	bot.Stderr = os.Stderr
 

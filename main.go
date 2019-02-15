@@ -20,6 +20,8 @@ import (
 var (
 	Bot *BotConfig
 
+	InstanceId string
+
 	IsThisABot bool
 	MasterPID  int
 	ConfigFile string
@@ -33,6 +35,7 @@ func init() {
 	flag.IntVar(&MasterPID, "masterpid", -1, "this master process' PID")
 	flag.StringVar(&ConfigFile, "config", "config.json", "path to the .json configuration file")
 	flag.BoolVar(&IsDebug, "debug", false, "launch in debug mode")
+	flag.StringVar(&InstanceId, "id", "", "an instance identifier (not actually used for anything)")
 	flag.Parse()
 
 	if IsThisABot {
