@@ -9,34 +9,34 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-const (
-	queueFile = "/tmp/bip-boup.queue"
-)
-
-type queueItem struct {
+type qItem struct {
 	Message string `json:"m"`
 	Channel string `json:"c"`
 	Time    string `json:"t"`
 }
 
-func createQueueFile() {
-	os.Create(queueFile)
-	os.Chmod(queueFile, 0600)
+type Q struct {
+	fileName string
 }
 
-func loadQueueFile() []queueItem {
-	fileHandler, err := os.Open(queueFile)
+func (q *Q) createQueueFile() {
+	os.Create(q.fileName)
+	os.Chmod(q.fileName, 0600)
+}
+
+func (q *Q) loadQueueFile() []qItem {
+	fileHandler, err := os.Open(q.fileName)
 	defer fileHandler.Close()
 	if err != nil {
 		if !os.IsNotExist(err) {
 			panic(err)
 		}
 
-		createQueueFile()
-		return loadQueueFile()
+		q.createQueueFile()
+		return q.loadQueueFile()
 	}
 
-	var items []queueItem
+	var items []qItem
 
 	decoder := json.NewDecoder(fileHandler)
 	err = decoder.Decode(&items)
@@ -49,16 +49,16 @@ func loadQueueFile() []queueItem {
 	return items
 }
 
-func writeQueueFile(items *[]queueItem) {
-	fileHandler, err := os.OpenFile(queueFile, os.O_WRONLY|os.O_TRUNC, 0600)
+func (q *Q) writeQueueFile(items *[]qItem) {
+	fileHandler, err := os.OpenFile(q.fileName, os.O_WRONLY|os.O_TRUNC, 0600)
 	defer fileHandler.Close()
 	if err != nil {
 		if !os.IsNotExist(err) {
 			panic(err)
 		}
 
-		createQueueFile()
-		writeQueueFile(items)
+		q.createQueueFile()
+		q.writeQueueFile(items)
 		return
 	}
 
@@ -69,24 +69,24 @@ func writeQueueFile(items *[]queueItem) {
 	}
 }
 
-func addItemInQueue(item queueItem) {
-	items := loadQueueFile()
+func (q *Q) addItemInQueue(item qItem) {
+	items := q.loadQueueFile()
 	items = append(items, item)
-	writeQueueFile(&items)
+	q.writeQueueFile(&items)
 }
 
-func Queue(channel string, message string, t time.Time) {
-	item := queueItem{
+func (q *Q) Queue(channel string, message string, t time.Time) {
+	item := qItem{
 		Message: message,
 		Channel: channel,
 		Time:    t.UTC().Format(time.ANSIC),
 	}
-	addItemInQueue(item)
+	q.addItemInQueue(item)
 }
 
-func GoThroughQueue(send func(string, *discordgo.MessageEmbed) (*discordgo.Message, error)) {
-	items := loadQueueFile()
-	var newItems []queueItem
+func (q *Q) GoThrough(send func(string, *discordgo.MessageEmbed) (*discordgo.Message, error)) {
+	items := q.loadQueueFile()
+	var newItems []qItem
 
 	now := time.Now().UTC().Truncate(time.Minute)
 	for _, item := range items {
@@ -102,9 +102,13 @@ func GoThroughQueue(send func(string, *discordgo.MessageEmbed) (*discordgo.Messa
 		}
 	}
 
-	writeQueueFile(&newItems)
+	q.writeQueueFile(&newItems)
 }
 
-func GetQueueLength() int {
-	return len(loadQueueFile())
+func (q *Q) GetLength() int {
+	return len(q.loadQueueFile())
+}
+
+func NewQueue(fileName string) *Q {
+	return &Q{fileName: fileName}
 }

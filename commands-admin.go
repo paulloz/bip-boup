@@ -9,8 +9,6 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"gopkg.in/src-d/go-git.v4"
-
-	"github.com/paulloz/bip-boup/queue"
 )
 
 func commandRestart(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
@@ -95,7 +93,7 @@ func commandUpdate(args []string, env *CommandEnvironment) (*discordgo.MessageEm
 }
 
 func commandQueue(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
-	n := queue.GetQueueLength()
+	n := Queue.GetLength()
 	s := func() string {
 		if n == 1 {
 			return ""

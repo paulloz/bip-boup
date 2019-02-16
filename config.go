@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 
 	"github.com/bwmarrin/discordgo"
@@ -20,7 +21,9 @@ type BotConfig struct {
 	Admins []string `json:"Admins"`
 
 	CacheDir string `json:"-"`
-	Modified bool   `json:"-"`
+	Database string `json:"database"`
+
+	Modified bool `json:"-"`
 
 	RepoURL string `json:"-"`
 }
@@ -46,6 +49,15 @@ func initConfig(file string) {
 func checkConfig() {
 	if len(Bot.CommandPrefix) <= 0 {
 		Bot.CommandPrefix = "!"
+	}
+
+	if len(Bot.Database) <= 0 {
+		db := "/tmp/%s-queue.json"
+		dbSuffix := "bip-boup"
+		if len(InstanceId) > 0 {
+			dbSuffix = InstanceId
+		}
+		Bot.Database = fmt.Sprintf(db, dbSuffix)
 	}
 
 	Bot.RepoURL = "https://github.com/paulloz/bip-boup.git"

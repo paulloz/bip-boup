@@ -18,7 +18,8 @@ import (
 
 // Globals
 var (
-	Bot *BotConfig
+	Bot   *BotConfig
+	Queue *queue.Q
 
 	InstanceId string
 
@@ -41,6 +42,7 @@ func init() {
 	if IsThisABot {
 		initLog("BOT", IsDebug)
 		initConfig(ConfigFile)
+		Queue = queue.NewQueue(Bot.Database)
 		initCache()
 	} else {
 		initLog("MASTER", IsDebug)
@@ -84,7 +86,7 @@ func main() {
 					case <-sc:
 						return
 					case <-ticker:
-						queue.GoThroughQueue(Bot.DiscordSession.ChannelMessageSendEmbed)
+						Queue.GoThrough(Bot.DiscordSession.ChannelMessageSendEmbed)
 					}
 				}
 			}()

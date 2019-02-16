@@ -8,7 +8,6 @@ import (
 	"github.com/olebedev/when"
 	"github.com/olebedev/when/rules/common"
 
-	"github.com/paulloz/bip-boup/queue"
 	"github.com/paulloz/bip-boup/when/fr"
 )
 
@@ -37,7 +36,7 @@ func commandReminder(args []string, env *CommandEnvironment) (*discordgo.Message
 		return nil, ""
 	}
 
-	queue.Queue(env.Channel.ID, split[longest[0]], r.Time)
+	Queue.Queue(env.Channel.ID, split[longest[0]], r.Time)
 
 	return nil, "ok :ok_hand:"
 }
