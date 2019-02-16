@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
@@ -65,8 +66,21 @@ func commandUpdate(args []string, env *CommandEnvironment) (*discordgo.MessageEm
 		return &discordgo.MessageEmbed{Title: "Mise à jour", Color: 0x90ee90, Description: "Aucune mise à jour nécessaire."}, ""
 	}
 
+	goFiles, err := filepath.Glob(tmpDir + "/*.go")
+
+	for _, goFile := range goFiles {
+		sedCommand := exec.Command("sed", "-i", "s/github\\.com\\/paulloz\\/bip-boup\\//\\.\\//g", goFile)
+		sedCommand.Dir = tmpDir
+		output, err = sedCommand.CombinedOutput()
+		if err != nil {
+			Bot.DiscordSession.ChannelMessageDelete(env.Channel.ID, updateEmbed.ID)
+			errorEmbed.Description = fmt.Sprintf("Échec de la commande sed.\n%s\n%s", err.Error(), output)
+			return errorEmbed, ""
+		}
+	}
+
 	outputFile := fmt.Sprintf("%s/%s", tmpDir, os.Args[0])
-	buildCommand := exec.Command("go", "build", "-ldflags", "-X main.GitCommit="+hash, "-o", outputFile)
+	buildCommand := exec.Command("go", "build", "-ldflags", ("-X main.GitCommit=" + hash), "-o", outputFile)
 	buildCommand.Dir = tmpDir
 	output, err = buildCommand.CombinedOutput()
 	if err != nil {
