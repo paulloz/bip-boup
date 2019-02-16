@@ -105,6 +105,14 @@ func initCommands() {
 		},
 		RequiredArguments: []string{"requête"},
 	}
+
+	Bot.Commands["8ball"] = &Command{
+		Function: command8Ball, HelpText: "Aide à choisir dans les moments difficiles.",
+		Arguments: []CommandArgument{
+			{Name: "une question", Description: "Une interrogation sur laquelle vous souhaitez une réponse", ArgType: "string"},
+		},
+		RequiredArguments: []string{"une question"},
+	}
 }
 
 func callCommand(commandName string, args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
