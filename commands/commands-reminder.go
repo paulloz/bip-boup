@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"strings"
@@ -8,10 +8,11 @@ import (
 	"github.com/olebedev/when"
 	"github.com/olebedev/when/rules/common"
 
+	"github.com/paulloz/bip-boup/bot"
 	"github.com/paulloz/bip-boup/when/fr"
 )
 
-func commandReminder(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
+func commandReminder(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*discordgo.MessageEmbed, string) {
 	w := when.New(nil)
 	w.Add(common.All...)
 	w.Add(fr.All...)
@@ -36,7 +37,7 @@ func commandReminder(args []string, env *CommandEnvironment) (*discordgo.Message
 		return nil, ""
 	}
 
-	Queue.Queue(env.Channel.ID, split[longest[0]], r.Time)
+	b.Queue.Queue(env.Channel.ID, split[longest[0]], r.Time)
 
 	return nil, "ok :ok_hand:"
 }

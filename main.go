@@ -13,14 +13,14 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 
+	"github.com/paulloz/bip-boup/bot"
+	"github.com/paulloz/bip-boup/commands"
 	"github.com/paulloz/bip-boup/log"
-	"github.com/paulloz/bip-boup/queue"
 )
 
 // Globals
 var (
-	Bot   *BotConfig
-	Queue *queue.Q
+	Bot *bot.Bot
 
 	InstanceId string
 
@@ -42,9 +42,8 @@ func init() {
 
 	if IsThisABot {
 		log.InitLog("BOT", IsDebug)
-		initConfig(ConfigFile)
-		Queue = queue.NewQueue(Bot.Database)
-		initCache()
+		Bot = bot.NewBot(ConfigFile, InstanceId)
+		Bot.GitCommit = GitCommit
 	} else {
 		log.InitLog("MASTER", IsDebug)
 	}
@@ -87,7 +86,7 @@ func main() {
 					case <-sc:
 						return
 					case <-ticker:
-						Queue.GoThrough(Bot.DiscordSession.ChannelMessageSendEmbed)
+						Bot.Queue.GoThrough(Bot.DiscordSession.ChannelMessageSendEmbed)
 					}
 				}
 			}()
@@ -95,8 +94,8 @@ func main() {
 			log.Info.Println("Disconnecting from Discord...")
 			discord.Close()
 
-			saveConfig(ConfigFile)
-			clearCache()
+			Bot.SaveConfig(ConfigFile)
+			Bot.ClearCache()
 		} else {
 			log.Error.Println("Couldn't find an authentification token, exiting...")
 			os.Exit(1)
@@ -135,7 +134,7 @@ func discordReady(session *discordgo.Session, event *discordgo.Ready) {
 	Bot.BotName = session.State.User.Username
 
 	log.Info.Println("Registering commands...")
-	initCommands()
+	Bot.Commands = commands.InitCommands()
 
 	log.Info.Println("Everything is ready!")
 

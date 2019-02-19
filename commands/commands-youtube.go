@@ -1,14 +1,17 @@
-package main
+package commands
 
 import (
 	"fmt"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+
+	"github.com/paulloz/bip-boup/bot"
+	"github.com/paulloz/bip-boup/httpreq"
 )
 
-func commandNightcore(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
-	doc, err := httpGetAsHTML(fmt.Sprintf("%s&search_query=nightcore+%s", "https://www.youtube.com/results?sp=EgIQAQ%253D%253D", strings.Join(args, "+")))
+func commandNightcore(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*discordgo.MessageEmbed, string) {
+	doc, err := httpreq.HTTPGetAsHTML(fmt.Sprintf("%s&search_query=nightcore+%s", "https://www.youtube.com/results?sp=EgIQAQ%253D%253D", strings.Join(args, "+")))
 	if err != nil {
 		return nil, ""
 	}

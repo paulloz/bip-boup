@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"fmt"
@@ -6,13 +6,17 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/moovweb/gokogiri/xpath"
+
+	"github.com/paulloz/bip-boup/bot"
+	"github.com/paulloz/bip-boup/embed"
+	"github.com/paulloz/bip-boup/httpreq"
 )
 
-func commandHLTB(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
+func commandHLTB(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*discordgo.MessageEmbed, string) {
 	url := "https://howlongtobeat.com/search_results.php?page=1"
 	params := fmt.Sprintf("queryString=%s&t=games&sorthead=popular&sortd=Normal Order&plat=&length_type=main&length_min=&length_max=&detail=", strings.Join(args, " "))
 
-	doc, err := httpPostAsHTML(url, params)
+	doc, err := httpreq.HTTPPostAsHTML(url, params)
 	if err != nil {
 		return nil, ""
 	}
@@ -64,7 +68,7 @@ func parseGameResult(gameResult []string) []string {
 func formatResult(title string, imageURL string, content []string, args []string) (*discordgo.MessageEmbed, string) {
 	fields := []*discordgo.MessageEmbedField{}
 	for i := 0; i < len(content)-1; i += 2 {
-		fields = append(fields, embedField(content[i], formatTime(content[i+1]), true))
+		fields = append(fields, embed.EmbedField(content[i], formatTime(content[i+1]), true))
 	}
 
 	return &discordgo.MessageEmbed{

@@ -1,4 +1,4 @@
-package main
+package bot
 
 import (
 	"encoding/json"
@@ -7,34 +7,33 @@ import (
 	"os"
 )
 
-// Cache ...
 type Cache struct {
 	LastModified string
 	Values       *map[string]string
 }
 
-func getCacheFileName(name string) string {
-	return fmt.Sprintf("%s/%s", Bot.CacheDir, name)
+func (b *BotConfig) getCacheFileName(name string) string {
+	return fmt.Sprintf("%s/%s", b.CacheDir, name)
 }
 
-func initCache() {
+func (b *BotConfig) initCache() {
 	tempDir, err := ioutil.TempDir("", "bipboupcache")
 	if err != nil {
 		panic(err)
 	}
 
-	Bot.CacheDir = tempDir
+	b.CacheDir = tempDir
 }
 
-func clearCache(leaveDirOpt ...bool) {
-	os.RemoveAll(Bot.CacheDir)
+func (b *BotConfig) ClearCache(leaveDirOpt ...bool) {
+	os.RemoveAll(b.CacheDir)
 	if len(leaveDirOpt) > 0 && leaveDirOpt[0] {
-		initCache()
+		b.initCache()
 	}
 }
 
-func getCache(name string) (cache *Cache) {
-	fileHandler, err := os.Open(getCacheFileName(name))
+func (b *BotConfig) GetCache(name string) (cache *Cache) {
+	fileHandler, err := os.Open(b.getCacheFileName(name))
 	defer fileHandler.Close()
 	if err != nil {
 		return
@@ -49,14 +48,14 @@ func getCache(name string) (cache *Cache) {
 	return
 }
 
-func setCache(name string, lastModified string, values *map[string]string) {
+func (b *BotConfig) SetCache(name string, lastModified string, values *map[string]string) {
 	// First we check the cacheDir still exists. If not, we create a new one.
-	fileInfo, err := os.Stat(Bot.CacheDir)
+	fileInfo, err := os.Stat(b.CacheDir)
 	if err != nil || !fileInfo.IsDir() {
-		clearCache(true)
+		b.ClearCache(true)
 	}
 
-	fileHandler, err := os.OpenFile(getCacheFileName(name), os.O_CREATE|os.O_WRONLY, 0644)
+	fileHandler, err := os.OpenFile(b.getCacheFileName(name), os.O_CREATE|os.O_WRONLY, 0644)
 	defer fileHandler.Close()
 	if err != nil {
 		return

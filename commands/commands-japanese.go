@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"fmt"
@@ -7,9 +7,11 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/gojp/kana"
 	"github.com/ikawaha/kagome/tokenizer"
+
+	"github.com/paulloz/bip-boup/bot"
 )
 
-func commandFurigana(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
+func commandFurigana(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*discordgo.MessageEmbed, string) {
 	text := strings.Join(args, " ")
 	if len(text) <= 0 {
 		return nil, ""

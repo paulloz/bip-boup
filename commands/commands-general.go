@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"fmt"
@@ -7,12 +7,15 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+
+	"github.com/paulloz/bip-boup/bot"
+	ss "github.com/paulloz/bip-boup/strings"
 )
 
-func commandGeneralHelp(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
+func commandGeneralHelp(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*discordgo.MessageEmbed, string) {
 	// Get all commands
 	var commands []string
-	for command := range Bot.Commands {
+	for command := range b.Commands {
 		commands = append(commands, command)
 	}
 	sort.Strings(commands)
@@ -24,13 +27,13 @@ func commandGeneralHelp(args []string, env *CommandEnvironment) (*discordgo.Mess
 
 	fields := []*discordgo.MessageEmbedField{}
 	for _, commandName := range commands {
-		command := Bot.Commands[commandName]
+		command := b.Commands[commandName]
 
 		if len(command.IsAliasTo) > 0 {
 			continue
 		}
 
-		if command.IsAdmin && !isUserAdmin(env.User) {
+		if command.IsAdmin && !b.IsUserAdmin(env.User) {
 			continue
 		}
 
@@ -39,7 +42,7 @@ func commandGeneralHelp(args []string, env *CommandEnvironment) (*discordgo.Mess
 		}
 
 		newField := &discordgo.MessageEmbedField{
-			Name:   Bot.CommandPrefix + commandName,
+			Name:   b.CommandPrefix + commandName,
 			Value:  command.HelpText,
 			Inline: true,
 		}
@@ -47,7 +50,7 @@ func commandGeneralHelp(args []string, env *CommandEnvironment) (*discordgo.Mess
 		length += len(newField.Name) + len(newField.Value)
 
 		if length >= 6000 {
-			Bot.DiscordSession.ChannelMessageSendEmbed(env.Channel.ID, &discordgo.MessageEmbed{
+			env.Session.ChannelMessageSendEmbed(env.Channel.ID, &discordgo.MessageEmbed{
 				Title:  fmt.Sprintf("%s (%d)", embedTitle, n),
 				Fields: fields,
 			})
@@ -70,18 +73,18 @@ func commandGeneralHelp(args []string, env *CommandEnvironment) (*discordgo.Mess
 	}, ""
 }
 
-func commandHelp(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
+func commandHelp(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*discordgo.MessageEmbed, string) {
 	if len(args) <= 0 {
-		return commandGeneralHelp(args, env)
+		return commandGeneralHelp(args, env, b)
 	}
 
-	if command, exists := Bot.Commands[args[0]]; exists {
-		usage := fmt.Sprintf("%s%s", Bot.CommandPrefix, args[0])
+	if command, exists := b.Commands[args[0]]; exists {
+		usage := fmt.Sprintf("%s%s", b.CommandPrefix, args[0])
 		arguments := []string{}
 
 		for _, arg := range command.Arguments {
 			argString := arg.Name
-			if !contains(command.RequiredArguments, arg.Name) {
+			if !ss.Contains(command.RequiredArguments, arg.Name) {
 				argString = fmt.Sprintf("[%s]", argString)
 				// required = "(obligatoire)"
 			}
@@ -99,7 +102,7 @@ func commandHelp(args []string, env *CommandEnvironment) (*discordgo.MessageEmbe
 		}
 
 		return &discordgo.MessageEmbed{
-			Title:       fmt.Sprintf("Aide de %s%s", Bot.CommandPrefix, args[0]),
+			Title:       fmt.Sprintf("Aide de %s%s", b.CommandPrefix, args[0]),
 			Description: command.HelpText,
 			Fields:      fields,
 		}, ""
@@ -108,7 +111,7 @@ func commandHelp(args []string, env *CommandEnvironment) (*discordgo.MessageEmbe
 	return nil, ""
 }
 
-func commandPing(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
+func commandPing(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*discordgo.MessageEmbed, string) {
 	pingResults := make([]int, 4)
 
 	// Perform the pings
@@ -116,7 +119,7 @@ func commandPing(args []string, env *CommandEnvironment) (*discordgo.MessageEmbe
 	for i := 0; i < len(pingResults); i++ {
 		currentTime := int(time.Now().UnixNano() / 1000000)
 
-		ping, err := Bot.DiscordSession.ChannelMessageSendEmbed(env.Channel.ID, pingEmbed)
+		ping, err := env.Session.ChannelMessageSendEmbed(env.Channel.ID, pingEmbed)
 		if err != nil {
 			pingResults[i] = -1
 			continue
@@ -124,7 +127,7 @@ func commandPing(args []string, env *CommandEnvironment) (*discordgo.MessageEmbe
 
 		newTime := int(time.Now().UnixNano() / 1000000)
 
-		Bot.DiscordSession.ChannelMessageDelete(env.Channel.ID, ping.ID)
+		env.Session.ChannelMessageDelete(env.Channel.ID, ping.ID)
 
 		pingResults[i] = newTime - currentTime
 	}

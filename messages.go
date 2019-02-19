@@ -6,6 +6,8 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 
+	"github.com/paulloz/bip-boup/bot"
+	"github.com/paulloz/bip-boup/commands"
 	"github.com/paulloz/bip-boup/log"
 )
 
@@ -55,11 +57,12 @@ func handleMessage(session *discordgo.Session, message *discordgo.Message) {
 		commandContent := strings.TrimPrefix(content, prefix)
 		command := strings.Split(commandContent, " ")
 
-		responseEmbed, responseText = callCommand(command[0], command[1:], &CommandEnvironment{
+		responseEmbed, responseText = commands.CallCommand(command[0], command[1:], &bot.CommandEnvironment{
 			Guild: guild, Channel: channel,
 			User: message.Author, Member: member,
 			Message: message,
-		})
+			Session: Bot.DiscordSession,
+		}, Bot)
 	}
 
 	if responseEmbed != nil {

@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"bytes"
@@ -18,6 +18,11 @@ import (
 	"github.com/moovweb/gokogiri"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
+
+	"github.com/paulloz/bip-boup/bot"
+	"github.com/paulloz/bip-boup/embed"
+	"github.com/paulloz/bip-boup/httpreq"
+	ss "github.com/paulloz/bip-boup/strings"
 )
 
 // Depute ...
@@ -45,8 +50,8 @@ type Depute struct {
 	} `json:"depute"`
 }
 
-func commandDirectANNoSession(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
-	body, err := httpGet("http://data.assemblee-nationale.fr/static/openData/repository/15/vp/seances/seances_publique_libre_office.csv")
+func commandDirectANNoSession(args []string, env *bot.CommandEnvironment) (*discordgo.MessageEmbed, string) {
+	body, err := httpreq.HTTPGet("http://data.assemblee-nationale.fr/static/openData/repository/15/vp/seances/seances_publique_libre_office.csv")
 	if err != nil {
 		return nil, ""
 	}
@@ -72,7 +77,7 @@ func commandDirectANNoSession(args []string, env *CommandEnvironment) (*discordg
 		if record[0] == d {
 			if record[1] >= t {
 				value := regexp.MustCompile("\\s{2,}").Split(record[2], -1) // They use 4, 5 or 6 spaces to split data ¯\_(ツ)_/¯
-				value = every(value, func(s string) string { return fmt.Sprintf("  - %s.", s) })
+				value = ss.Every(value, func(s string) string { return fmt.Sprintf("  - %s.", s) })
 				sessions = append(sessions, &struct {
 					Key   string
 					Value []string
@@ -104,10 +109,10 @@ func commandDirectANNoSession(args []string, env *CommandEnvironment) (*discordg
 	return nil, ""
 }
 
-func commandDirectAN(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
+func commandDirectAN(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*discordgo.MessageEmbed, string) {
 	url := "http://videos.assemblee-nationale.fr/direct.1"
 
-	doc, err := httpGetAsHTML(url)
+	doc, err := httpreq.HTTPGetAsHTML(url)
 	if err != nil {
 		return nil, ""
 	}
@@ -117,8 +122,8 @@ func commandDirectAN(args []string, env *CommandEnvironment) (*discordgo.Message
 	playerTitleNode, _ := rootNode.Search("//div[contains(@class, 'playerTitle')]")
 	if len(playerTitleNode) > 0 {
 		descriptionNode, _ := rootNode.Search("//div[contains(@class, 'txtEditorial')]")
-		subjects := choose(strings.Split(descriptionNode[0].Content(), "- "), func(s string) bool { return len(s) > 0 })
-		subjects = every(subjects, func(s string) string { return fmt.Sprintf(" - %s.", s) })
+		subjects := ss.Choose(strings.Split(descriptionNode[0].Content(), "- "), func(s string) bool { return len(s) > 0 })
+		subjects = ss.Every(subjects, func(s string) string { return fmt.Sprintf(" - %s.", s) })
 
 		return &discordgo.MessageEmbed{
 			Title: "Séance en cours",
@@ -132,7 +137,7 @@ func commandDirectAN(args []string, env *CommandEnvironment) (*discordgo.Message
 	return commandDirectANNoSession(args, env)
 }
 
-func buildDeputeCache(name string, opt ...string) {
+func buildDeputeCache(b *bot.Bot, name string, opt ...string) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest("GET", "https://www.nosdeputes.fr/deputes/enmandat/xml", nil)
@@ -170,20 +175,20 @@ func buildDeputeCache(name string, opt ...string) {
 		values[slug[0].Content()] = strings.ToLower(name[0].Content())
 	}
 
-	setCache(name, resp.Header["Date"][0], &values)
+	b.SetCache(name, resp.Header["Date"][0], &values)
 }
 
-func commandDeputeSearch(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
+func commandDeputeSearch(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*discordgo.MessageEmbed, string) {
 	cacheName := "deputes"
-	var cache *Cache
+	var cache *bot.Cache
 
-	if cache = getCache(cacheName); cache == nil {
-		buildDeputeCache(cacheName)
+	if cache = b.GetCache(cacheName); cache == nil {
+		buildDeputeCache(b, cacheName)
 	} else {
 		// Last-Modified is not working right now
 		// buildDeputeCache(cacheName, cache.LastModified)
 	}
-	if cache = getCache(cacheName); cache == nil {
+	if cache = b.GetCache(cacheName); cache == nil {
 		return nil, ""
 	}
 
@@ -197,34 +202,34 @@ func commandDeputeSearch(args []string, env *CommandEnvironment) (*discordgo.Mes
 	}
 
 	if len(results) == 1 {
-		return commandDepute([]string{results[0]}, env)
+		return commandDepute([]string{results[0]}, env, b)
 	} else if len(results) > 1 {
 		for _, slug := range results {
-			env.Message.Content = fmt.Sprintf("%sdepute %s", Bot.CommandPrefix, slug)
-			handleMessage(Bot.DiscordSession, env.Message)
+			env.Message.Content = fmt.Sprintf("%sdepute %s", b.CommandPrefix, slug)
+			go commandDepute([]string{slug}, env, b)
 		}
 	}
 	return nil, ""
 }
 
-func commandDepute(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
+func commandDepute(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*discordgo.MessageEmbed, string) {
 	isMn := func(r rune) bool {
 		return unicode.Is(unicode.Mn, r)
 	}
 	t := transform.Chain(norm.NFD, transform.RemoveFunc(isMn), norm.NFC)
 
-	slug := strings.Join(every(args, func(s string) string {
+	slug := strings.Join(ss.Every(args, func(s string) string {
 		_s, _, _ := transform.String(t, s)
 		return strings.ToLower(_s)
 	}), "-")
 	url := fmt.Sprintf("https://www.nosdeputes.fr/%s/json", slug)
 
-	body, err := httpGet(url)
+	body, err := httpreq.HTTPGet(url)
 	if err != nil {
 		return nil, ""
 	}
 	if len(body) == 0 {
-		return commandDeputeSearch(args, env)
+		return commandDeputeSearch(args, env, b)
 	}
 
 	var depute Depute
@@ -247,19 +252,19 @@ func commandDepute(args []string, env *CommandEnvironment) (*discordgo.MessageEm
 		for _, responsability := range depute.D.Responsabilities {
 			respParl = append(respParl, fmt.Sprintf("%s, %s.", responsability.R.Organism, responsability.R.Function))
 		}
-		fields = append(fields, embedField("Responsabilités parlementaires", strings.Join(respParl, "\n")))
+		fields = append(fields, embed.EmbedField("Responsabilités parlementaires", strings.Join(respParl, "\n")))
 	}
 
 	parsedBirthDate, _ := time.Parse("2006-01-02", depute.D.BirthDate)
 	age := int(time.Since(parsedBirthDate).Hours() / 24 / 365)
-	fields = append(fields, embedField("Âge", fmt.Sprintf("%d ans", age), true))
-	fields = append(fields, embedField("Profession", depute.D.Profession, true))
+	fields = append(fields, embed.EmbedField("Âge", fmt.Sprintf("%d ans", age), true))
+	fields = append(fields, embed.EmbedField("Profession", depute.D.Profession, true))
 
 	if len(depute.D.Twitter) > 0 {
-		fields = append(fields, embedField("Twitter", fmt.Sprintf("[@%s](https://twitter.com/%s)", depute.D.Twitter, depute.D.Twitter), true))
+		fields = append(fields, embed.EmbedField("Twitter", fmt.Sprintf("[@%s](https://twitter.com/%s)", depute.D.Twitter, depute.D.Twitter), true))
 	}
 
-	fields = append(fields, embedField("Fiches", fmt.Sprintf("[Assemblée Nationale](%s)\n[NosDéputés.fr](%s)", depute.D.URLAN, depute.D.URLNosDeputes), true))
+	fields = append(fields, embed.EmbedField("Fiches", fmt.Sprintf("[Assemblée Nationale](%s)\n[NosDéputés.fr](%s)", depute.D.URLAN, depute.D.URLNosDeputes), true))
 
 	imageURL := fmt.Sprintf("https://www.nosdeputes.fr/depute/photo/%s/120", depute.D.Slug)
 
