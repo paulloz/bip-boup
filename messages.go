@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+
+	"github.com/paulloz/bip-boup/log"
 )
 
 func handleMessage(session *discordgo.Session, message *discordgo.Message) {
@@ -48,7 +50,7 @@ func handleMessage(session *discordgo.Session, message *discordgo.Message) {
 	}
 
 	if prefix != "" {
-		Debug.Println("[" + channel.Name + "] " + message.Author.Username + ": " + content)
+		log.Debug.Println("[" + channel.Name + "] " + message.Author.Username + ": " + content)
 
 		commandContent := strings.TrimPrefix(content, prefix)
 		command := strings.Split(commandContent, " ")
@@ -63,7 +65,7 @@ func handleMessage(session *discordgo.Session, message *discordgo.Message) {
 	if responseEmbed != nil {
 		_, err := session.ChannelMessageSendEmbed(message.ChannelID, responseEmbed)
 		if err != nil {
-			Error.Println(err.Error())
+			log.Error.Println(err.Error())
 		}
 	}
 

@@ -6,9 +6,10 @@ import (
 	"os"
 
 	"github.com/bwmarrin/discordgo"
+
+	"github.com/paulloz/bip-boup/log"
 )
 
-// BotConfig ...
 type BotConfig struct {
 	Commands       map[string]*Command `json:"-"`
 	DiscordSession *discordgo.Session  `json:"-"`
@@ -80,6 +81,6 @@ func saveConfig(file string) {
 	encoder.SetIndent("", "    ")
 	err = encoder.Encode(&Bot)
 	if err != nil {
-		Error.Println(err.Error())
+		log.Error.Println(err.Error())
 	}
 }

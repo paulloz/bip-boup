@@ -10,10 +10,12 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"gopkg.in/src-d/go-git.v4"
+
+	"github.com/paulloz/bip-boup/log"
 )
 
 func commandRestart(args []string, env *CommandEnvironment) (*discordgo.MessageEmbed, string) {
-	Info.Println("Received a restart command, exiting...")
+	log.Info.Println("Received a restart command, exiting...")
 
 	Bot.DiscordSession.ChannelMessageSend(env.Channel.ID, "Je reviens dans un instant...")
 	fileHandler, err := os.Create("/tmp/bip-boup.restart")

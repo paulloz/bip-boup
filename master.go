@@ -4,10 +4,12 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+
+	"github.com/paulloz/bip-boup/log"
 )
 
 func spawnBot() int {
-	Info.Println("Spawning a new bot process...")
+	log.Info.Println("Spawning a new bot process...")
 
 	bot := exec.Command(os.Args[0], "-bot", "-masterpid", strconv.Itoa(os.Getpid()))
 

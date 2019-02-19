@@ -1,4 +1,4 @@
-package main
+package log
 
 import (
 	"io/ioutil"
@@ -6,7 +6,6 @@ import (
 	"os"
 )
 
-// Loggers
 var (
 	logFlags = log.Ldate | log.Ltime | log.Lshortfile
 
@@ -16,7 +15,7 @@ var (
 	Error   *log.Logger
 )
 
-func initLog(processName string, isDebug bool) {
+func InitLog(processName string, isDebug bool) {
 	Debug = log.New(ioutil.Discard, "["+processName+"] DEBUG: ", logFlags)
 	if isDebug {
 		Debug = log.New(os.Stdout, "["+processName+"] DEBUG: ", logFlags)
