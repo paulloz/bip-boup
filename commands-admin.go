@@ -66,7 +66,9 @@ func commandUpdate(args []string, env *CommandEnvironment) (*discordgo.MessageEm
 		return &discordgo.MessageEmbed{Title: "Mise à jour", Color: 0x90ee90, Description: "Aucune mise à jour nécessaire."}, ""
 	}
 
-	goFiles, err := filepath.Glob(tmpDir + "/*.go")
+	goFiles, _ := filepath.Glob(tmpDir + "/*.go")
+	subGoFiles, _ := filepath.Glob(tmpDir + "/**/*.go")
+	goFiles = append(goFiles, subGoFiles...)
 
 	for _, goFile := range goFiles {
 		sedCommand := exec.Command("sed", "-i", "s/github\\.com\\/paulloz\\/bip-boup\\//\\.\\//g", goFile)
@@ -114,6 +116,7 @@ func commandQueue(args []string, env *CommandEnvironment) (*discordgo.MessageEmb
 		}
 		return "s"
 	}()
+
 	return &discordgo.MessageEmbed{
 		Title:       "Queue",
 		Description: fmt.Sprintf("Il y a actuellement %d message%s dans la queue.", n, s),
