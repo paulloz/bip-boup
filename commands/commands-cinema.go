@@ -59,6 +59,8 @@ func commandTomatoes(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*d
 		return resp, ""
 	}
 
+	url := "https://www.rottentomatoes.com" + parsed.Movies[0].URL
+
 	resp.Title = fmt.Sprintf("%s (%d)", parsed.Movies[0].Name, parsed.Movies[0].Year)
 	resp.Image = &discordgo.MessageEmbedImage{URL: parsed.Movies[0].Image, Width: 120}
 
@@ -67,6 +69,7 @@ func commandTomatoes(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*d
 		fmt.Sprintf("%d%% (%s)", parsed.Movies[0].Score, strings.Replace(parsed.Movies[0].Class, "_", " ", -1)),
 		true,
 	))
+	resp.Fields = append(resp.Fields, embed.EmbedField("Plus d'informations", url, true))
 
 	switch parsed.Movies[0].Class {
 	case "certified_fresh":
@@ -77,7 +80,11 @@ func commandTomatoes(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*d
 		resp.Color = 0xc26001
 	}
 
-	doc, err = httpreq.HTTPGetAsHTML("https://www.rottentomatoes.com" + parsed.Movies[0].URL)
+	resp.Footer = &discordgo.MessageEmbedFooter{
+		Text: "Source : http://rottentomatoes.com/",
+	}
+
+	doc, err = httpreq.HTTPGetAsHTML(url)
 	if err != nil {
 		return resp, ""
 	}
