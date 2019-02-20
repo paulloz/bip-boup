@@ -39,8 +39,9 @@ type CommandEnvironment struct {
 }
 
 type BotConfig struct {
-	BotName   string `json:"-"`
-	AuthToken string `json:"AuthToken"`
+	BotName           string `json:"-"`
+	AuthToken         string `json:"AuthToken"`
+	RandomDotOrgToken string `json:"RandomDotOrgToken"`
 
 	CommandPrefix string `json:"CommandPrefix"`
 
