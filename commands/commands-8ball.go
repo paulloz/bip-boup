@@ -30,3 +30,13 @@ func command8Ball(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*disc
 
 	return nil, fmt.Sprintf("%s : %s", env.Message.Author.Mention(), answers[rng.Intn(len(answers))])
 }
+
+func init() {
+	commands["8ball"] = &bot.Command{
+		Function: command8Ball, HelpText: "Aide à choisir dans les moments difficiles.",
+		Arguments: []bot.CommandArgument{
+			{Name: "une question", Description: "Une interrogation sur laquelle vous souhaitez une réponse", ArgType: "string"},
+		},
+		RequiredArguments: []string{"une question"},
+	}
+}

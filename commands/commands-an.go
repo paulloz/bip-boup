@@ -278,3 +278,17 @@ func commandDepute(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*dis
 		},
 	}, ""
 }
+
+func init() {
+	commands["directan"] = &bot.Command{Function: commandDirectAN, HelpText: "Envoie un lien vers la séance publique en cours à l'Assemblée Nationale."}
+
+	commands["député"] = &bot.Command{
+		Function: commandDepute, HelpText: "Montre les informations à propos d'un député disponibles sur NosDéputés.fr.",
+		Arguments: []bot.CommandArgument{
+			{Name: "prénom", Description: "Le prénom du député", ArgType: "string"},
+			{Name: "nom", Description: "Le nom du député", ArgType: "string"},
+		},
+		RequiredArguments: []string{"nom"},
+	}
+	commands["depute"] = &bot.Command{IsAliasTo: "député"}
+}

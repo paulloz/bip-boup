@@ -162,3 +162,16 @@ func commandPing(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*disco
 		Description: fmt.Sprintf("Le ping moyen est de ``%dms``. Un total de ``%d/%d`` paquets ont été perdus.\n", pingAverage, failCount, len(pingResults)),
 	}, ""
 }
+
+func init() {
+	commands["help"] = &bot.Command{
+		Function: commandHelp,
+		HelpText: "Montre une liste de commande que vous pouvez utiliser ou bien l'aide d'une commande spécifique.",
+		Arguments: []bot.CommandArgument{
+			{Name: "commande", Description: "Commande dont on veut afficher l'aide", ArgType: "commande"},
+		},
+	}
+	commands["?"] = &bot.Command{IsAliasTo: "help"}
+
+	commands["ping"] = &bot.Command{Function: commandPing, HelpText: "Retourne le ping moyen vers Discord."}
+}

@@ -89,3 +89,13 @@ func formatTime(time string) string {
 	}
 	return time
 }
+
+func init() {
+	commands["hltb"] = &bot.Command{
+		Function: commandHLTB, HelpText: "Donne le temps moyen pour finir un jeu.",
+		Arguments: []bot.CommandArgument{
+			{Name: "nom du jeu", Description: "La recherche à faire sur howlongtobeat", ArgType: "string"},
+		},
+		RequiredArguments: []string{"nom du jeu"},
+	}
+}

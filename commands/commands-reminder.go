@@ -41,3 +41,14 @@ func commandReminder(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*d
 
 	return nil, "ok :ok_hand:"
 }
+
+func init() {
+	commands["rappel"] = &bot.Command{
+		Function: commandReminder,
+		HelpText: "Enverra un message de rappel à l'heure indiquée",
+		Arguments: []bot.CommandArgument{
+			{Name: "requête", Description: "Une requête en langage naturel qui sera plus ou moins bien interprétée", ArgType: "string"},
+		},
+		RequiredArguments: []string{"requête"},
+	}
+}

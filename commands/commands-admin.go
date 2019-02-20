@@ -130,3 +130,18 @@ func commandQueue(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*disc
 		Description: fmt.Sprintf("Il y a actuellement %d message%s dans la queue.", n, s),
 	}, ""
 }
+
+func init() {
+	commands["restart"] = &bot.Command{
+		Function: commandRestart, IsAdmin: true,
+		HelpText: "Arrête et redémarre le bot.",
+	}
+	commands["update"] = &bot.Command{
+		Function: commandUpdate, IsAdmin: true,
+		HelpText: "Met à jour et redémarre le bot.",
+	}
+	commands["queue"] = &bot.Command{
+		Function: commandQueue, IsAdmin: true,
+		HelpText: "Renvoie le contenu de la queue.",
+	}
+}

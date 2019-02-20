@@ -27,3 +27,13 @@ func commandNightcore(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*
 
 	return nil, ""
 }
+
+func init() {
+	commands["nightcore"] = &bot.Command{
+		Function: commandNightcore, HelpText: "Cherche du nightcore sur YouTube.",
+		Arguments: []bot.CommandArgument{
+			{Name: "requête", Description: "La recherche à faire sur YouTube", ArgType: "string"},
+		},
+		RequiredArguments: []string{"requête"},
+	}
+}

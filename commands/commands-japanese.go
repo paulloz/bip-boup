@@ -38,3 +38,13 @@ func commandFurigana(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*d
 
 	return &discordgo.MessageEmbed{Title: strings.Join(tokenized, " "), Color: 0xffffff}, ""
 }
+
+func init() {
+	commands["furigana"] = &bot.Command{
+		Function: commandFurigana, HelpText: "Ajoute des furiganas à un texte en Japonais.",
+		Arguments: []bot.CommandArgument{
+			{Name: "texte", Description: "Le texte dans lequel on veut insérer des furiganas", ArgType: "string"},
+		},
+		RequiredArguments: []string{"texte"},
+	}
+}
