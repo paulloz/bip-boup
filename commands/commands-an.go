@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"regexp"
 	"sort"
@@ -93,9 +94,10 @@ func commandDirectANNoSession(args []string, env *bot.CommandEnvironment) (*disc
 	if len(sessions) > 0 {
 		fields := []*discordgo.MessageEmbedField{}
 		for _, session := range sessions {
+			n := (int)(math.Min(3, (float64)(len(session.Value))))
 			fields = append(fields, &discordgo.MessageEmbedField{
 				Name:   "à " + session.Key,
-				Value:  strings.Join(session.Value[:3], "\n"),
+				Value:  strings.Join(session.Value[:n], "\n"),
 				Inline: false,
 			})
 		}
