@@ -20,7 +20,7 @@ func commandUrban(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*disc
 		Footer:      &discordgo.MessageEmbedFooter{Text: "Source: https://www.urbandictionary.com/"},
 	}
 
-	doc, err := httpreq.HTTPGetAsHTML(fmt.Sprintf("https://www.urbandictionary.com/define.php?term=%s", request))
+	doc, err := httpreq.HTTPGetAsHTML(fmt.Sprintf("https://www.urbandictionary.com/define.php?term=%s", strings.Replace(request, " ", "%20", -1)))
 	if err != nil {
 		return resp, ""
 	}
