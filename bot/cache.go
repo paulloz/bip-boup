@@ -25,6 +25,13 @@ func (b *BotConfig) initCache() {
 	b.CacheDir = tempDir
 }
 
+func (b *BotConfig) createCacheIfNeeded() {
+	fileInfo, err := os.Stat(b.CacheDir)
+	if err != nil || !fileInfo.IsDir() {
+		b.ClearCache(true)
+	}
+}
+
 func (b *BotConfig) ClearCache(leaveDirOpt ...bool) {
 	os.RemoveAll(b.CacheDir)
 	if len(leaveDirOpt) > 0 && leaveDirOpt[0] {
@@ -33,14 +40,7 @@ func (b *BotConfig) ClearCache(leaveDirOpt ...bool) {
 }
 
 func (b *BotConfig) GetCache(name string) (cache *Cache) {
-	fileHandler, err := os.Open(b.getCacheFileName(name))
-	defer fileHandler.Close()
-	if err != nil {
-		return
-	}
-
-	decoder := json.NewDecoder(fileHandler)
-	err = decoder.Decode(&cache)
+	err := json.Unmarshal(b.GetCacheRaw(name), &cache)
 	if err != nil {
 		cache = nil
 	}
@@ -48,12 +48,20 @@ func (b *BotConfig) GetCache(name string) (cache *Cache) {
 	return
 }
 
+func (b *BotConfig) GetCacheRaw(name string) []byte {
+	fileHandler, err := os.Open(b.getCacheFileName(name))
+	defer fileHandler.Close()
+	if err != nil {
+		return []byte{}
+	}
+
+	bytes, err := ioutil.ReadAll(fileHandler)
+	return bytes
+}
+
 func (b *BotConfig) SetCache(name string, lastModified string, values *map[string]string) {
 	// First we check the cacheDir still exists. If not, we create a new one.
-	fileInfo, err := os.Stat(b.CacheDir)
-	if err != nil || !fileInfo.IsDir() {
-		b.ClearCache(true)
-	}
+	b.createCacheIfNeeded()
 
 	fileHandler, err := os.OpenFile(b.getCacheFileName(name), os.O_CREATE|os.O_WRONLY, 0644)
 	defer fileHandler.Close()
@@ -62,5 +70,18 @@ func (b *BotConfig) SetCache(name string, lastModified string, values *map[strin
 	}
 
 	encoder := json.NewEncoder(fileHandler)
-	err = encoder.Encode(&Cache{LastModified: lastModified, Values: values})
+	encoder.Encode(&Cache{LastModified: lastModified, Values: values})
+}
+
+func (b *BotConfig) SetCacheRaw(name string, values []byte) {
+	// First we check the cacheDir still exists. If not, we create a new one.
+	b.createCacheIfNeeded()
+
+	fileHandler, err := os.OpenFile(b.getCacheFileName(name), os.O_CREATE|os.O_WRONLY, 0644)
+	defer fileHandler.Close()
+	if err != nil {
+		return
+	}
+
+	fileHandler.Write(values)
 }
