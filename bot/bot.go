@@ -47,7 +47,7 @@ type BotConfig struct {
 	Admins []string `json:"Admins"`
 
 	CacheDir string `json:"-"`
-	Database string `json:"database"`
+	Database string `json:"Database"`
 	MemeDir  string `json:"MemeDir"`
 
 	Modified bool `json:"-"`
