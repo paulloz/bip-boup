@@ -48,6 +48,7 @@ type BotConfig struct {
 
 	CacheDir string `json:"-"`
 	Database string `json:"database"`
+	MemeDir  string `json:"MemeDir"`
 
 	Modified bool `json:"-"`
 

@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"fmt"
 	"image"
 	"io/ioutil"
 	"math/rand"
@@ -30,8 +31,10 @@ func commandSpongeBob(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*
 		}
 	}
 
+	dir := strings.TrimRight(b.MemeDir, "/")
+
 	if spongeBob == nil {
-		file, err := os.Open("commands/spongebob.jpeg")
+		file, err := os.Open(fmt.Sprintf("%s/spongebob.jpeg", dir))
 		if err != nil {
 			return nil, ""
 		}
@@ -44,7 +47,7 @@ func commandSpongeBob(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*
 	ctx := gg.NewContext(spongeBob.Bounds().Dx(), spongeBob.Bounds().Dy())
 	ctx.DrawImage(spongeBob, 0, 0)
 
-	ctx.LoadFontFace("commands/Impact.ttf", fontSize)
+	ctx.LoadFontFace(fmt.Sprintf("%s/Impact.ttf", dir), fontSize)
 	ctx.SetHexColor("#fff")
 	lines := ctx.WordWrap(text, float64(spongeBob.Bounds().Dx()))
 	for i, line := range lines {
