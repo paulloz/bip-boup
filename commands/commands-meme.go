@@ -1,9 +1,9 @@
 package commands
 
 import (
+	"bytes"
 	"fmt"
 	"image"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"strings"
@@ -12,7 +12,6 @@ import (
 	"github.com/fogleman/gg"
 
 	"github.com/paulloz/bip-boup/bot"
-	// "github.com/paulloz/bip-boup/embed"
 )
 
 var (
@@ -54,16 +53,10 @@ func commandSpongeBob(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*
 		ctx.DrawStringAnchored(line, float64((spongeBob.Bounds().Dx() / 2)), float64(((fontSize * 2) + (float64(i) * fontSize))), 0.5, 0.0)
 	}
 
-	f, err := ioutil.TempFile("", "")
-	tempFileName := f.Name()
-	if err != nil {
-		return nil, ""
-	}
-	defer f.Close()
-	defer os.Remove(tempFileName)
-	ctx.SavePNG(tempFileName)
+	var buffer bytes.Buffer
+	ctx.EncodePNG(&buffer)
 
-	env.Session.ChannelFileSend(env.Channel.ID, "spongebob.png", f)
+	env.Session.ChannelFileSend(env.Channel.ID, "spongebob.png", &buffer)
 
 	return nil, ""
 }
