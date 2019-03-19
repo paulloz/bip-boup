@@ -20,15 +20,13 @@ func command8Ball(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*disc
 		"Tu peux compter dessus.", "Sans aucun doute.", "C'est très probable.", "Oui !", "C'est bien parti pour :wink:", "C'est non, désolé…",
 		"Peu probable…", "Faut pas rêver…", "N'y compte même pas.", "Impossible !", "Je m'en fout complet, demande à quelqu'un d'autre et laisse moi pioncer bordel…"}
 
-	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
-
-	msg, _ := env.Session.ChannelMessageSend(env.Channel.ID, gifs[rng.Intn(len(gifs))])
+	msg, _ := env.Session.ChannelMessageSend(env.Channel.ID, gifs[rand.Intn(len(gifs))])
 
 	time.Sleep(7 * time.Second)
 
 	env.Session.ChannelMessageDelete(env.Channel.ID, msg.ID)
 
-	return nil, fmt.Sprintf("%s : %s", env.Message.Author.Mention(), answers[rng.Intn(len(answers))])
+	return nil, fmt.Sprintf("%s : %s", env.Message.Author.Mention(), answers[rand.Intn(len(answers))])
 }
 
 func init() {

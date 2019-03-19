@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"os/signal"
 	"strconv"
@@ -47,6 +48,8 @@ func init() {
 	} else {
 		log.InitLog("MASTER", IsDebug)
 	}
+
+	rand.Seed(time.Now().UnixNano())
 }
 
 func main() {
