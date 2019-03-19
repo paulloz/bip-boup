@@ -43,6 +43,8 @@ func commandSpongeBob(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*
 		}
 	}
 
+	msg, _ := env.Session.ChannelMessageSend(env.Channel.ID, ":writing_hand:")
+
 	ctx := gg.NewContext(spongeBob.Bounds().Dx(), spongeBob.Bounds().Dy())
 	ctx.DrawImage(spongeBob, 0, 0)
 
@@ -57,6 +59,10 @@ func commandSpongeBob(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*
 	ctx.EncodePNG(&buffer)
 
 	env.Session.ChannelFileSend(env.Channel.ID, "spongebob.png", &buffer)
+
+	if msg != nil {
+		env.Session.ChannelMessageDelete(env.Channel.ID, msg.ID)
+	}
 
 	return nil, ""
 }
