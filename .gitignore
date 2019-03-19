@@ -3,3 +3,6 @@ config.json
 
 # binaries
 bip-boup
+
+commands/*.jpeg
+commands/*.ttf
