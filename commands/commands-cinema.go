@@ -89,7 +89,7 @@ func commandTomatoes(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*d
 		return resp, ""
 	}
 
-	consensus, _ := doc.Root().Search(xpath.Compile("//p[contains(@class, 'critic_consensus')]"))
+	consensus, _ := doc.Root().Search(xpath.Compile("//p[contains(@class, 'mop-ratings-wrap__text--concensus')]"))
 	resp.Description = regexp.MustCompile("Critics? Consensus:").ReplaceAllString(consensus[0].Content(), "")
 
 	return resp, ""
