@@ -39,3 +39,11 @@ func Capitalize(s string) string {
 
 	return strings.ToUpper(string(s[0])) + string(s[1:])
 }
+
+func Reverse(ss []string) []string {
+	for i := 0; i < (len(ss) / 2); i++ {
+		j := len(ss) - i - 1
+		ss[i], ss[j] = ss[j], ss[i]
+	}
+	return ss
+}

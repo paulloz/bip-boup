@@ -66,7 +66,14 @@ func commandDirectANNoSession(args []string, env *bot.CommandEnvironment) (*disc
 		Value []string
 	}{}
 
+	first := ""
+	var firstSession *struct {
+		Key   []string
+		Value []string
+	}
+
 	reader := csv.NewReader(bytes.NewReader(body))
+	skipped := false
 	for {
 		record, err := reader.Read()
 		if err == io.EOF {
@@ -75,14 +82,28 @@ func commandDirectANNoSession(args []string, env *bot.CommandEnvironment) (*disc
 		if err != nil {
 			continue
 		}
+
+		if !skipped {
+			skipped = true
+			continue
+		}
+
+		fullTime := record[0] + " à " + record[1]
+
+		if len(first) == 0 || first > fullTime {
+			first = fullTime
+			firstSession = &struct {
+				Key   []string
+				Value []string
+			}{Key: []string{record[0], record[1]}, Value: formatSessionName(record[2])}
+		}
+
 		if record[0] == d {
 			if record[1] >= t {
-				value := regexp.MustCompile("\\s{2,}").Split(record[2], -1) // They use 4, 5 or 6 spaces to split data ¯\_(ツ)_/¯
-				value = ss.Every(value, func(s string) string { return fmt.Sprintf("  - %s.", s) })
 				sessions = append(sessions, &struct {
 					Key   string
 					Value []string
-				}{Key: record[1], Value: value})
+				}{Key: record[1], Value: formatSessionName(record[2])})
 			}
 		}
 	}
@@ -103,12 +124,37 @@ func commandDirectANNoSession(args []string, env *bot.CommandEnvironment) (*disc
 		}
 
 		return &discordgo.MessageEmbed{
-			Title:  "Pas de séance en cours, prochaines séances",
-			Fields: fields,
+			Title:       "Pas de séance en cours",
+			Description: "Prochaines séances :",
+			Fields:      fields,
 		}, ""
 	}
 
-	return nil, ""
+	if firstSession != nil {
+		date := strings.Join(ss.Reverse(strings.Split(firstSession.Key[0], "-")), "/")
+		time := firstSession.Key[1]
+		return &discordgo.MessageEmbed{
+			Title:       "Pas de séance en cours et aucune séance n'est prévue aujourd'hui",
+			Description: "Prochaines séances :",
+			Fields: []*discordgo.MessageEmbedField{
+				&discordgo.MessageEmbedField{
+					Name:   "le " + date + " à " + time,
+					Value:  strings.Join(firstSession.Value[:(int)(math.Min(3, (float64)(len(firstSession.Value))))], "\n"),
+					Inline: false,
+				},
+			},
+		}, ""
+	}
+
+	return &discordgo.MessageEmbed{
+		Title: "Aucune séance n'est prévue dans l'immédiat",
+	}, ""
+}
+
+func formatSessionName(in string) (value []string) {
+	value = regexp.MustCompile("\\s{2,}").Split(in, -1) // They use 4, 5 or 6 spaces to split data ¯\_(ツ)_/¯
+	value = ss.Every(value, func(s string) string { return fmt.Sprintf("  - %s.", s) })
+	return
 }
 
 func commandDirectAN(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*discordgo.MessageEmbed, string) {
