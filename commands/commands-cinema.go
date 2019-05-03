@@ -62,14 +62,14 @@ func commandTomatoes(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*d
 	url := "https://www.rottentomatoes.com" + parsed.Movies[0].URL
 
 	resp.Title = fmt.Sprintf("%s (%d)", parsed.Movies[0].Name, parsed.Movies[0].Year)
-	resp.Image = &discordgo.MessageEmbedImage{URL: parsed.Movies[0].Image, Width: 120}
+	resp.URL = url
+	resp.Image = &discordgo.MessageEmbedImage{URL: parsed.Movies[0].Image, Width: 240}
 
 	resp.Fields = append(resp.Fields, embed.EmbedField(
 		"Tomatometer",
 		fmt.Sprintf("%d%% (%s)", parsed.Movies[0].Score, strings.Replace(parsed.Movies[0].Class, "_", " ", -1)),
 		true,
 	))
-	resp.Fields = append(resp.Fields, embed.EmbedField("Plus d'informations", url, true))
 
 	switch parsed.Movies[0].Class {
 	case "certified_fresh":
