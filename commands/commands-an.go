@@ -281,8 +281,13 @@ func commandDepute(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*dis
 	}
 
 	var depute Depute
-	if err = json.Unmarshal(body, &depute); err != nil {
-		return nil, ""
+	if err = json.Unmarshal(body, &depute); err != nil || len(depute.D.Name) == 0 {
+		return &discordgo.MessageEmbed{
+			Title: "Aucun résultat",
+			Footer: &discordgo.MessageEmbedFooter{
+				Text: "Source : NosDéputés.fr par Regards Citoyens à partir de l'Assemblée nationale et du Journal Officiel",
+			},
+		}, ""
 	}
 
 	fields := []*discordgo.MessageEmbedField{}
