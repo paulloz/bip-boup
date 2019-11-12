@@ -13,9 +13,9 @@ import (
 )
 
 func commandHLTB(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*discordgo.MessageEmbed, string) {
-	url := "https://howlongtobeat.com/search_results.php?page=1"
+	baseURL := "https://howlongtobeat.com/"
+	url := fmt.Sprintf("%ssearch_results.php?page=1", baseURL)
 	params := fmt.Sprintf("queryString=%s&t=games&sorthead=popular&sortd=Normal Order&plat=&length_type=main&length_min=&length_max=&detail=", strings.Join(args, " "))
-
 	doc, err := httpreq.HTTPPostAsHTML(url, params)
 	if err != nil {
 		return nil, ""
@@ -31,7 +31,7 @@ func commandHLTB(args []string, env *bot.CommandEnvironment, b *bot.Bot) (*disco
 
 	var image string
 	for _, img := range images {
-		image = img.Attr("src")
+		image = fmt.Sprintf("%s%s", baseURL, img.Attr("src"))
 		break
 	}
 
